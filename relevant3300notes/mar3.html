@@ -1,0 +1,94 @@
+<html>
+<head>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+
+<body>
+	
+	<div id="histogram"></div>
+	
+	<script>
+	// This function generates values from an
+	//  Exponential distribution.
+	var randomExponential = function () {
+		return -Math.log(Math.random())
+	}
+	
+	// Generate a large number of values from the 
+	//  distribution.
+	var sequence = new Array(1000);
+	for (var i = 0; i < sequence.length; i++) {
+		sequence[i] = randomExponential();
+	}
+	
+	var height = 300;
+	var width = 400;
+	
+	var svg = d3.select("#histogram").append("svg")
+	.attr("height", height)
+	.attr("width", width);
+	
+	var padding = 50;
+	
+	// Create a linear scale from 0 to the max value
+	//  that we sampled.
+	var xScale = d3.scale.linear()
+	.domain([0, d3.max(sequence)]).range([0 + padding, width]);
+	
+	// Create a function that will take a data array
+	//  and divide the elements of that array into 
+	//  20 bins.
+	var histogram = d3.layout.histogram().bins(20);
+	// Create the bins for the random sequence.
+	//  "bins" is an array of arrays.
+	var bins = histogram(sequence);
+	// Each bin is an array of values, but it also
+	//  has some extra properties. "dx" is the width,
+	//  in data units (ie not pixels) of the bin.
+	// Since these are all the same, we can grab the 
+	//  width of the first one.
+	var binWidth = bins[0].dx;
+	
+	// Now that we know the size of the bins, we 
+	//  can define a y scale.
+	var yScale = d3.scale.linear()
+	.domain([0, d3.max(bins, function (bin) { return bin.y; })])
+	.range([height - padding, 10]);
+	
+	// Create a "bar" for each bin
+	var bars = svg.selectAll(".bar")
+	.data(bins);
+	
+	// But what is a bar? Let's make it a group.
+	bars.enter().append("g").attr("class", "bar");
+	
+	// And apply a style that shifts the coordinates.
+	// Now any coordinates of objects inside the 
+	//  bar group will be relative to this x,y point.
+	bars.attr("transform", function (bar) { return "translate(" + xScale(bar.x) + ", " + yScale(bar.y) + ")"; });
+	
+	// Include a rectangle. Since 0,0 within this 
+	//  group is already shifted to the right point,
+	//  we don't need to explicitly define them.
+	bars.append("rect")
+	.attr("x", 1)
+	// When calculating pixel width, take into account
+	//  the padding we added to the plot.
+	.attr("width", xScale(binWidth) - xScale(0) - 1)
+	// This part is tricky -- yScale(y) returns the 
+	//  distance in pixels from the top of the SVG to
+	//  the pixel corresponding to the value. We want
+	//  the distance from that pixel to the x-axis.
+	.attr("height", function (bar) { return height - padding - yScale(bar.y); });
+	
+	</script>
+	
+</body>
+</html>
+
+
+
+
+
+
+

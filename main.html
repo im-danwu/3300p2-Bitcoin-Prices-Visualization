@@ -1,0 +1,57 @@
+<html>
+<head>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+<body>
+    
+<script>
+    
+    // convert a string from 24 hour to 12 hour format
+    var convertHours = function(time) {
+        var colon = time.indexOf(":");
+        var hour = time.substring(0, colon);
+        var minute = time.substring(colon+1);
+        var period;
+        
+        if (hour < 12) {
+            if (hour == 0) {
+                hour = 12;
+            }
+            period = "AM";
+        } else {
+            if (hour > 12) {
+                hour = +hour%12;
+            }
+            period = "PM";
+        }        
+        return ""+hour+":"+minute+period;
+    }
+
+    // create canvas for graph
+    var height = 800;
+    var width = 800;
+
+    var svg = d3.select("#cluster").append("svg").attr("height", height).attr("width", width);
+
+    // holds the bitcoin prices
+    var points = [];
+    
+    var past = Date.now();
+    // pull the data for the bitcoins and create the graph
+    d3.csv("bitcoinstest.csv", function(d) {
+        return {
+            price: +d.buying,
+            time: d.time,
+            minute: d.time.substring(9)
+        };
+    }, function(error, rows) {
+        points = rows;
+        console.log(Date.now() - past);
+        
+        // create the graph
+        var xScale = d3.scale.linear().domain([0, 50]).range([0, width]);
+        var yScale = d3.scale.linear().domain([0, 50]).range([height, 0]);
+    });    
+</script>
+</body>
+</html>

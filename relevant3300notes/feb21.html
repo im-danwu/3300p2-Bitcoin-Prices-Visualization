@@ -1,0 +1,118 @@
+<html>
+<head>
+<!-- The dataset is here:
+http://mimno.infosci.cornell.edu/info3300/yelp_stars.json -->
+
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+svg { border: solid black 1px; }
+.axis path { fill: none; stroke: black;}
+.axis line { stroke: black; }
+text { font-size: small; font-family: "Open Sans", Calibri; opacity: 0.3; text-anchor: middle; alignment-baseline: central; }
+text:hover { fill: blue; opacity: 1.0; font-weight: bold; font-size: xx-large; }
+</style>
+</head>
+<body>
+
+	<table id="doc"></table>
+
+<!-- leave a spot for the SVG element -->
+<div id="canvas"></div>
+
+<script>
+// Today I'm shifting the range of the scales to leave some padding
+//  on either side of the plot.
+var xScale = d3.scale.linear()
+  .domain([-4, 4]).range([50,780]);
+var yScale = d3.scale.log()
+  .domain([100,26000]).range([750,20]);
+
+var svg = d3.select("#canvas").append("svg")
+   .attr("height", 800).attr("width", 800);
+
+// Now we create an "axis" function. We tell this function which
+//  scale to use by passing in our scale function.
+var xAxis = d3.svg.axis().scale(xScale);
+
+// The axis consists of multiple SVG elements (a line, tick marks, 
+//  and numbers). To keep these together, we'll put them into a <g> group.
+svg.append("g")
+// The default styles are awful, so we'll give this a class "axis",
+//  which we'll use to apply styles from the header.
+  .attr("class", "axis")
+// The scale function tells the axis where to be in the right-to-left
+//  dimension, but not up-and-down. We'll add a transform to shift
+//  the whole axis group down to the bottom of the plot.
+  .attr("transform", "translate(0, " + yScale(100) + ")")
+	// This last part tells the <g> element to apply the xAxis function
+	//  that will actually create the axis elements.
+  .call(xAxis);
+
+// Now do the same thing for the y scale. The only thing we need
+//  to do is change the orientation, to tell d3 to put the tick 
+//  marks and numbers to the left of the line.
+var yAxis = d3.svg.axis().scale(yScale).orient("left");
+svg.append("g")
+	.attr("class", "axis")
+	.attr("transform", "translate(50, 0)")
+	.call(yAxis);
+
+var yelp;
+
+d3.json("yelp_stars.json", function (data) {
+  yelp = data;
+  
+	// Oops! I counted all the tokens, but only put terms that occur
+	//  more than 100 times into the file. Recalculate the sum of 
+	//  just those token counts.
+	yelp.fivestartokens = d3.sum(yelp.words, function (w) { return w.fivestar; } )
+	
+	// Now start generating a fake review.
+	var review = "";
+	
+	// Add ten word tokens...
+	for (var i = 0; i < 10; i++ ) {
+		// Pick a random point from 0 to the total number of tokens
+		//  in five-star reviews.
+		var sample = Math.random() * yelp.fivestartokens;
+		// Figure out where this point lies in the mapping from words
+		//  to numbers.
+		var wordIndex = 0;
+		while (sample > yelp.words[wordIndex].fivestar) {
+			// If the "sample" doesn't fall within the range allocated
+			//  to this word, subtract that range and move to the next word.
+			sample -= yelp.words[wordIndex].fivestar;
+			wordIndex++;
+		}
+		// Add the selected word to the review, and append it to a table.
+		review += yelp.words[wordIndex].word + " ";
+		var row = d3.select("#doc").append("tr");
+		row.append("td").text(review);
+	}	
+
+  var logRatio = function(w) {
+	// Remember that "w" will be an element from our data array.
+    return Math.log(w.fivestar / yelp.fivestartokens) -
+           Math.log(w.onestar / yelp.onestartokens );
+  };
+
+  var words = svg.selectAll("text").data(yelp.words);
+
+  words.enter().append("text")
+    .attr("x", function(w) { return xScale(logRatio(w))})
+    .attr("y", function(w) { return yScale(w.count); })
+    .text(function (w) { return w.word; } );
+});
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
