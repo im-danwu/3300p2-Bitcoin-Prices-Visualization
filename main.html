@@ -6,11 +6,17 @@
     
 <script>
     
-    // convert a string from 24 hour to 12 hour format
-    var convertHours = function(time) {
-        var colon = time.indexOf(":");
-        var hour = time.substring(0, colon);
-        var minute = time.substring(colon+1);
+    // return an object with time string parsed
+    var parseTime = function(datetime) {
+        var datetime = datetime.split(" ");
+        var date = datetime[0].split("/");
+        var time = datetime[1].split(":");
+        
+        var year = 20+date[2];
+        var month = date[0];
+        var day = date[1];
+        var hour = time[0];
+        var minute = time[1];
         var period;
         
         if (hour < 12) {
@@ -23,8 +29,17 @@
                 hour = +hour%12;
             }
             period = "PM";
-        }        
-        return ""+hour+":"+minute+period;
+        }
+
+        return {
+            time: datetime.join(" "),
+            year: +year,
+            month: +month,
+            day: +day,
+            hour: +hour,
+            minute: +minute,
+            period: period
+        };
     }
 
     // create canvas for graph
@@ -33,25 +48,22 @@
 
     var svg = d3.select("#cluster").append("svg").attr("height", height).attr("width", width);
 
-    // holds the bitcoin prices
+    // holds the bitcoin prices and times
     var points = [];
     
-    var past = Date.now();
     // pull the data for the bitcoins and create the graph
     d3.csv("bitcoinstest.csv", function(d) {
-        return {
-            price: +d.buying,
-            time: d.time,
-            minute: d.time.substring(9)
-        };
+        var point = parseTime(d.time);
+        point.price = +d.buying;
+        return point;
+        
     }, function(error, rows) {
         points = rows;
-        console.log(Date.now() - past);
         
         // TODO: create the graph
         var xScale = d3.scale.linear().domain([0, 50]).range([0, width]);
         var yScale = d3.scale.linear().domain([0, 50]).range([height, 0]);
-    });    
+    });
 </script>
 </body>
 </html>
