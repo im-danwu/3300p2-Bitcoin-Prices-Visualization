@@ -2,10 +2,23 @@
 <head>
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <style>
+        p {
+            font-family: Helvetica;
+        }
+            
         svg {
             border: 1px solid black;
             padding: 30px;
         }
+        
+            #graph {
+                float: left;
+            }
+
+            #minigraph {
+                float: left;
+                margin-left: 20px;
+            }
         
         /* Styling from http://alignedleft.com/tutorials/d3/axes*/
         .axis path,
@@ -14,8 +27,11 @@
             shape-rendering: crispEdges;
             stroke: black;
         }
-        .axis text { font-size: 11px; }
         
+            .axis text {
+                font-size: 11px;
+            }
+
         /* Styling from https://gist.github.com/benjchristensen/2579599 */
         .line {
             fill: none;
@@ -27,11 +43,14 @@
             fill: lightsteelblue;
             stroke-width: 0;
         }
+        
+        
     </style>
 </head>
 <body>
-    <div id='timeframe'>Bitcoin Price from to</div>
+    <p id='timeframe'></p>
     <div id='graph'></div>
+    <div id='minigraph'></div>
     
 <script>
     // create canvas for graph
@@ -39,6 +58,11 @@
     var width = 900;
 
     var svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
+    
+    var miniHeight = 100;
+    var miniWidth = 150;
+    
+    var mini = d3.select("#minigraph").append("svg").attr("height", miniHeight).attr("width", miniWidth);
 
     /**
     * create graph functions
@@ -49,19 +73,11 @@
         // assuming data is in chronological order!
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
+        var xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
 
         var yMin = d3.min(data, function(d) { return d.price; });
         var yMax = d3.max(data, function(d) { return d.price; });
-
-        // date/time axis
-        var xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
-        var xAxis = d3.svg.axis().scale(xScale);
-        svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
-
-        // price axis
         var yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
-        var yAxis = d3.svg.axis().scale(yScale).orient("left");
-        svg.append("g").attr("class", "axis").call(yAxis);
         
         // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
         var area = d3.svg.area()
@@ -78,13 +94,55 @@
 
         svg.append("path").attr("class", "line").attr("d", line(data));
         
-        // set graph title
-        setTitle(xMin, xMax);
+        // date/time axis
+        var xAxis = d3.svg.axis().scale(xScale);
+        svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
+
+        // price axis
+        var yAxis = d3.svg.axis().scale(yScale).orient("left");
+        svg.append("g").attr("class", "axis").call(yAxis);
+                
+        // set graph timeframe
+        setTimeframe(xMin, xMax);
     }
     
     /**
     * helper functions
     */
+    
+    var setTimeframe = function(first, last) {
+        // to cut off day of the week part of string
+        var whitespace = first.toDateString().indexOf(" ");
+
+        // check if looking within one day
+        if (first.toDateString() === last.toDateString()) {
+            d3.select("#timeframe").append("text").text("Bitcoin price on "
+                                                        +first.toDateString().substring(whitespace+1)
+                                                        +" from"
+                                                        +" "+formatAMPM(first)
+                                                        +" to "
+                                                        +" "+formatAMPM(last))
+        } else {
+            d3.select("#timeframe").append("text").text("Bitcoin price from "
+                                                        +first.toDateString().substring(whitespace+1)
+                                                        +" "+formatAMPM(first)
+                                                        +" to "
+                                                        +last.toDateString().substring(whitespace+1)
+                                                        +" "+formatAMPM(last))
+        }
+    }
+
+    // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
+    function formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
 
     /**
     * rest of the script
