@@ -103,14 +103,14 @@
         svg.append("g").attr("class", "axis").call(yAxis);
                 
         // set graph timeframe
-        setTimeframe(xMin, xMax);
+        setMinuteTimeframe(xMin, xMax);
     }
     
     /**
     * helper functions
     */
     
-    var setTimeframe = function(first, last) {
+    var setMinuteTimeframe = function(first, last) {
         // to cut off day of the week part of string
         var whitespace = first.toDateString().indexOf(" ");
 
