@@ -22,9 +22,15 @@
             stroke: steelblue;
             stroke-width: 2;
         }
+        
+        .area {
+            fill: lightsteelblue;
+            stroke-width: 0;
+        }
     </style>
 </head>
 <body>
+    <div id='timeframe'>Bitcoin Price from to</div>
     <div id='graph'></div>
     
 <script>
@@ -37,6 +43,11 @@
     /**
     * Helper functions
     */
+    
+    // helper function
+    function getDate(d) {
+        return new Date(d.time);
+    }
     
     // return an object with time string parsed
     var parseTime = function(datetime) {
@@ -75,7 +86,7 @@
     }
 
     /**
-    * Create graph functions
+    * create graph functions
     */
 
     // create minute timeframe graph
@@ -89,31 +100,35 @@
         var yMin = d3.min(data, function(d) { return d.price; });
         var yMax = d3.max(data, function(d) { return d.price; });
 
-        // Time
+        // date/time
         var xScale = d3.scale.linear().domain([xMin, xMax]).range([0, width]);
         var xAxis = d3.svg.axis().scale(xScale);
         svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
 
-        // Price
+        // price
         var yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
         var yAxis = d3.svg.axis().scale(yScale).orient("left");
         svg.append("g").attr("class", "axis").call(yAxis);
         
-        // Line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
+        // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
+        var area = d3.svg.area()
+            .x(function(d, i) { return xScale(i); })
+            .y0(height)
+            .y1(function(d) { return yScale(d.price); });
+        
+        svg.append("path").datum(data).attr("class", "area").attr("d", area);
+        
+        // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
         var line = d3.svg.line()
-        .x(function(d, i) {
-            return xScale(i);
-        })
-        .y(function(d) {
-            return yScale(d.price);
-        })
+        .x(function(d, i) { return xScale(i); })
+        .y(function(d) { return yScale(d.price); });
 
-        // Append one path to svg setting d with the line function passing in the p7 json array
-        svg.append("path").attr("class", "line").attr("transform", "translate("+20+",0)").attr("d", line(data));
+        svg.append("path").attr("class", "line").attr("d", line(data));
+
     }
 
     /**
-    * Rest of the Script
+    * rest of the script
     */
 
     // holds the bitcoin prices and times
