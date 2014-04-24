@@ -1,11 +1,39 @@
 <html>
 <head>
     <script src="http://d3js.org/d3.v3.min.js"></script>
+    <style>
+        svg {
+            border: 1px solid black;
+            padding: 30px;
+        }
+        
+        /* Styling from http://alignedleft.com/tutorials/d3/axes*/
+        .axis path,
+        .axis line {
+            fill: none;
+            shape-rendering: crispEdges;
+            stroke: black;
+        }
+        .axis text { font-size: 11px; }
+        
+        /* Styling from https://gist.github.com/benjchristensen/2579599 */
+        .line {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 2;
+        }
+    </style>
 </head>
 <body>
     <div id='graph'></div>
     
 <script>
+    // create canvas for graph
+    var height = 500;
+    var width = 900;
+
+    var svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
+
     /**
     * Helper functions
     */
@@ -51,44 +79,58 @@
     */
 
     // create minute timeframe graph
-    var minuteGraph = function (data, height, width) {
-        
-        var xMin = data[0].minute;
-        var xMax = data[data.length-1].minute;
-        console.log(height, width);
+    var minuteGraph = function (data) {
+        var xMin = data[0].time;
+        var xMax = data[data.length-1].time;
+
+        var xMin = 0;
+        var xMax = data.length-1;
+
+        var yMin = d3.min(data, function(d) { return d.price; });
+        var yMax = d3.max(data, function(d) { return d.price; });
+
         // Time
         var xScale = d3.scale.linear().domain([xMin, xMax]).range([0, width]);
-        
-        // Price
-        var yScale = d3.scale.linear().domain([0, 50]).range([height, 0]);
+        var xAxis = d3.svg.axis().scale(xScale);
+        svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
 
+        // Price
+        var yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
+        var yAxis = d3.svg.axis().scale(yScale).orient("left");
+        svg.append("g").attr("class", "axis").call(yAxis);
+        
+        // Line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
+        var line = d3.svg.line()
+        .x(function(d, i) {
+            return xScale(i);
+        })
+        .y(function(d) {
+            return yScale(d.price);
+        })
+
+        // Append one path to svg setting d with the line function passing in the p7 json array
+        svg.append("path").attr("class", "line").attr("transform", "translate("+20+",0)").attr("d", line(data));
     }
-    
+
     /**
     * Rest of the Script
     */
 
-    // create canvas for graph
-    var height = 800;
-    var width = 800;
-
-    var svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
-
     // holds the bitcoin prices and times
     var points = [];
-    
+
     // pull the data for the bitcoins and create the graph
     d3.csv("bitcoinstest.csv", function(d) {
         var point = parseTime(d.time);
         point.price = +d.buying;
         return point;
-        
+
     }, function(error, rows) {
         points = rows;
-        
+
         // TODO: create the default graph
         // Call a create graph function that we can swap out if we want to change the default graph
-        minuteGraph(points, height, width);
+        minuteGraph(points);
     });
     
 </script>
