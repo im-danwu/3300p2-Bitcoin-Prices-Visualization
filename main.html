@@ -6,6 +6,9 @@
     <div id='graph'></div>
     
 <script>
+    /**
+    * Helper functions
+    */
     
     // return an object with time string parsed
     var parseTime = function(datetime) {
@@ -43,6 +46,28 @@
         };
     }
 
+    /**
+    * Create graph functions
+    */
+
+    // create minute timeframe graph
+    var minuteGraph = function (data, height, width) {
+        
+        var xMin = data[0].minute;
+        var xMax = data[data.length-1].minute;
+        console.log(height, width);
+        // Time
+        var xScale = d3.scale.linear().domain([xMin, xMax]).range([0, width]);
+        
+        // Price
+        var yScale = d3.scale.linear().domain([0, 50]).range([height, 0]);
+
+    }
+    
+    /**
+    * Rest of the Script
+    */
+
     // create canvas for graph
     var height = 800;
     var width = 800;
@@ -63,10 +88,9 @@
         
         // TODO: create the default graph
         // Call a create graph function that we can swap out if we want to change the default graph
-        
-        var xScale = d3.scale.linear().domain([0, 50]).range([0, width]);
-        var yScale = d3.scale.linear().domain([0, 50]).range([height, 0]);
+        minuteGraph(points, height, width);
     });
+    
 </script>
 </body>
 </html>
