@@ -1,0 +1,41 @@
+p {
+     font-family: Helvetica;
+}
+            
+svg {
+    border: 1px solid black;
+    padding: 30px;
+}
+        
+#graph {
+    float: left;
+}
+
+#minigraph {
+    float: left;
+    margin-left: 20px;
+}
+        
+/* Styling from http://alignedleft.com/tutorials/d3/axes*/
+.axis path,
+.axis line {
+    fill: none;
+    shape-rendering: crispEdges;
+    stroke: black;
+}
+
+.axis text {
+    font-size: 11px;
+}
+
+/* Styling from https://gist.github.com/benjchristensen/2579599 */
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2;
+}
+
+.area {
+    fill: lightsteelblue;
+    stroke-width: 0;
+}
