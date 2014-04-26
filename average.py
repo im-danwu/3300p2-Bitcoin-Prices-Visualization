@@ -8,10 +8,10 @@ def avg(stack):
         return sum(stack) / float(len(stack))
 
 lines = []
-with open('bitcoins.csv') as f:
+with open('bitcoins-minute.csv') as f:
     lines = [line.strip() for line in f.readlines()]
 
-f = open('bitcoins-hourly.csv', 'w')
+f = open('bitcoins-daily.csv', 'w')
 
 prev = datetime.now()
 stack = []
@@ -19,7 +19,7 @@ for line in lines:
     buy, sell, timestr = line.split(',')
     timestamp = datetime.strptime(timestr, '%Y-%m-%d %H:%M:%S')
 
-    if timestamp.hour == prev.hour:
+    if timestamp.day == prev.day:
         stack.append(float(buy))
     else:
         average = avg(stack)
