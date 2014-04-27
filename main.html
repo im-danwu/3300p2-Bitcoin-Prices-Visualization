@@ -1,51 +1,7 @@
 <html>
 <head>
     <script src="http://d3js.org/d3.v3.min.js"></script>
-    <style>
-        p {
-            font-family: Helvetica;
-        }
-            
-        svg {
-            border: 1px solid black;
-            padding: 30px;
-        }
-        
-            #graph {
-                float: left;
-            }
-
-            #minigraph {
-                float: left;
-                margin-left: 20px;
-            }
-        
-        /* Styling from http://alignedleft.com/tutorials/d3/axes*/
-        .axis path,
-        .axis line {
-            fill: none;
-            shape-rendering: crispEdges;
-            stroke: black;
-        }
-        
-            .axis text {
-                font-size: 11px;
-            }
-
-        /* Styling from https://gist.github.com/benjchristensen/2579599 */
-        .line {
-            fill: none;
-            stroke: steelblue;
-            stroke-width: 2;
-        }
-        
-        .area {
-            fill: lightsteelblue;
-            stroke-width: 0;
-        }
-        
-        
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
     <p id='timeframe'></p>
@@ -53,6 +9,9 @@
     <div id='minigraph'></div>
     
 <script>
+    // data file to read in
+    var DATA = "bitcoinstest.csv";
+    
     // create canvas for graph
     var height = 500;
     var width = 900;
@@ -65,10 +24,10 @@
     var mini = d3.select("#minigraph").append("svg").attr("height", miniHeight).attr("width", miniWidth);
 
     /**
-    * create graph functions
+    * graph functions
     */
 
-    // create minute timeframe graph
+    // DEPRECRATED: create minute timeframe graph
     var minuteGraph = function (data) {
         // assuming data is in chronological order!
         var xMin = data[0].time;
@@ -103,13 +62,46 @@
         svg.append("g").attr("class", "axis").call(yAxis);
                 
         // set graph timeframe
-        setMinuteTimeframe(xMin, xMax);
+        setMinuteTimeframe(xMin, xMax);        
+    }
+    
+    var hourGraph = function(data) {
+    }
+    
+    var dayGraph = function(data) {
+        
     }
     
     /**
     * helper functions
     */
     
+    // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
+    function formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+    
+    // DEPRECATED: convert from minutes to hours
+    var minutesToHours = function(data) {
+        
+    }
+    
+    // convert from hours to days
+    var hoursToDays = function(data) {  
+    }
+    
+    /*
+    * setting title functions
+    */
+    
+    // DEPRECATED
     var setMinuteTimeframe = function(first, last) {
         // to cut off day of the week part of string
         var whitespace = first.toDateString().indexOf(" ");
@@ -131,31 +123,31 @@
                                                         +" "+formatAMPM(last))
         }
     }
-
-    // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
-    function formatAMPM(date) {
-        var hours = date.getHours();
-        var minutes = date.getMinutes();
-        var ampm = hours >= 12 ? 'pm' : 'am';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        minutes = minutes < 10 ? '0'+minutes : minutes;
-        var strTime = hours + ':' + minutes + ' ' + ampm;
-        return strTime;
+    
+    var setHourTimeframe = function(first, last) {
+    }
+    
+    var setDayTimeframe = function(first, last) {
     }
 
     /**
-    * rest of the script
+    * main script
     */
 
     // holds the bitcoin prices and times
     var points = [];
 
     // pull the data for the bitcoins and create the graph
-    d3.csv("bitcoinstest.csv", function(d) {
+    d3.csv(DATA, function(d) {
+        var time = new Date(d.time);
+        
         return {
             price: d.buying,
-            time: new Date(d.time)
+            time: time,
+            month: time.getMonth(),
+            day: time.getDay(),
+            hour: time.getHours(),
+            minute: time.getMinutes()
         };
     }, function(error, rows) {
         points = rows;
