@@ -149,15 +149,16 @@
                 d = x0 - d0.time > d1.time - x0 ? d1 : d0;
             
             // redraw the rectangle
-            point.attr("transform", "translate(" + x(d.time) + "," + y(d.price) + ")");
-            point.select("#time").text(formatDate(d.time));
+            point.attr("transform", "translate(" + x(new Date(d.time)) + "," + y(d.price) + ")");
+            point.select("#time").text(formatDate(new Date(d.time)));
             point.select("#price").text(formatCurrency(d.price));
             
             // redraw linepointer
             linepointer
-                .attr("x1", x(d.time))
+                .attr("x1", x(new Date(d.time)))
                 .attr("y1", y(d.price))
-                .attr("x2", x(d.time));
+                .attr("x2", x(new Date(d.time)));
+
         }
     };
 
@@ -186,9 +187,7 @@
         
         //===================Make x axis scale=======================
         x = d3.time.scale()
-            .domain(d3.extent(data, function (d) {
-            return d.time;
-        }))
+            .domain(d3.extent(data, function (d) { return d.time; }))
             .range([0, width]);
 
         make_x_axis = function () {
@@ -201,9 +200,7 @@
 
         //===================Make y axis scale=======================
         y = d3.scale.linear()
-            .domain(d3.extent(data, function (d) {
-            return d.price;
-        }))
+            .domain(d3.extent(data, function (d) { return d.price; }))
             .range([height, 0]);
 
         make_y_axis = function () {
@@ -302,11 +299,11 @@
 	    	});
 
 	        daData = rows;
-
+	        //console.log(x.domain());
 	        //return min and max dates for x-axis and prices for y-axis
         	x.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
         	y.domain(d3.extent(rows, function(d) { return d.price; })).range([height, 0]);
-        	
+        	//console.log(x.domain());
 	        //section we wish to apply changes/transitions
 	        var svg = d3.select("#graph").transition();
 
@@ -319,7 +316,10 @@
 	        svg.select(".y.axis")
 	        	.duration(500)
 	        	.call(yAxis);
-            
+
+            svg.select(".point").remove();
+            svg.select("#linepointer").remove();
+            svg.select(".overlay").remove();
             makeHover();
 	    });
 	}
