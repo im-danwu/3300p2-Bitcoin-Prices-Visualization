@@ -36,23 +36,6 @@
     var xScale,
         yScale;
 
-    margin = {
-        top: 20,
-        right: 20,
-        bottom: 20,
-        left: 45
-    };
-
-    // data file to read in
-    var DATA = "bitcoins-daily.csv";
-    
-    // create canvas for graph
-    width = 1100 - margin.left - margin.right;
-    height = 600 - margin.top - margin.bottom;
-
-    var xScale,
-    	yScale;
-
     var xAxis,
         yAxis;
 
@@ -67,6 +50,24 @@
     var svg;
 
     var dadata;
+
+    margin = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 45
+    };
+
+    // data file to read in
+    var DATA = "bitcoins-daily.csv";
+    
+    // create canvas for graph
+    // increase and decrease margin as appropriate for zooming
+    width = 1100 - margin.left - margin.right;
+    height = 600 - margin.top - margin.bottom;
+
+
+    
 
     // DEPRECATED: mini version of graph with different y axis
 //    var miniHeight = 100;
@@ -95,35 +96,31 @@
 
     // draw the graph with the given data from createData
     var createGraph = function (data) {
+
+        //so dadata is the global data
         dadata = data;
-        // assuming data is in chronological order!
+
+        //===================Make x axis scale=======================
         x = d3.time.scale()
             .domain(d3.extent(data, function (d) {
             return d.time;
         }))
             .range([0, width]);
 
+        make_x_axis = function () {
+            return d3.svg.axis()
+                .scale(x)
+                .orient("bottom")
+                .ticks(7);
+        };
+
+
+        //===================Make y axis scale=======================
         y = d3.scale.linear()
             .domain(d3.extent(data, function (d) {
             return d.price;
         }))
             .range([height, 0]);
-
-        line = d3.svg.line()
-            .x(function(d) { return x(d.time); })
-            .y(function(d) { return y(d.price); });
-
-        zoom = d3.behavior.zoom()
-            .x(x)
-            .y(y)
-            .on("zoom", zoomed);
-
-        make_x_axis = function () {
-            return d3.svg.axis()
-                .scale(x)
-                .orient("bottom")
-                .ticks(9);
-        };
 
         make_y_axis = function () {
         return d3.svg.axis()
@@ -132,6 +129,23 @@
             .ticks(9);
         }
 
+        //===================Draw line function=======================
+
+        line = d3.svg.line()
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(d.price); });
+
+
+        //===================Make zoom function=======================
+        zoom = d3.behavior.zoom()
+            .x(x)
+            .y(y)
+            .on("zoom", zoomed);
+
+        
+
+        
+        //===================Create SVG=======================
         svg = d3.select("#graph").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
