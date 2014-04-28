@@ -20,7 +20,8 @@
     // holds the bitcoin prices and times
     var points = [];
 
-    var xScale, yScale;
+    //initialize before functions so we can use globally
+    var xScale, yScale, xAxis, yAxis;
     
     // data file to read in
     var DATA = "bitcoins-daily.csv";
@@ -87,12 +88,12 @@
         svg.append("path").attr("class", "line").attr("d", line(data));
         
         // date/time axis
-        var xAxis = d3.svg.axis().scale(xScale);
-        svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
+        xAxis = d3.svg.axis().scale(xScale);
+        svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
 
         // price axis
-        var yAxis = d3.svg.axis().scale(yScale).orient("left");
-        svg.append("g").attr("class", "axis").call(yAxis);
+        yAxis = d3.svg.axis().scale(yScale).orient("left");
+        svg.append("g").attr("class", "y axis").call(yAxis);
                 
         // set graph timeframe
         setTimeframe(xMin, xMax);
@@ -185,27 +186,35 @@
     /**
 	* Update Functions for each timeframe
     */
+
+    //return the line values 
+	var lineValues = d3.svg.line()
+						.x(function(d) { return xScale(new Date(d.time)); })
+						.y(function(d) { return yScale(d.price); })
+
     function updateGraph(csvfile) {
     	// pull the data for the bitcoins and create the graph
 	    d3.csv(csvfile, function(error, rows) {
 	    	rows.forEach(function(d) {
-	    		d.date =  new Date(d.time),
+	    		d.date = new Date(d.time),
 	    		d.price = +d.price
 	    	});
 
 	        points = rows;
 
 	        //return min and max dates for x-axis and prices for y-axis
-        	xScale.domain(d3.extent(rows, function(d) { return d.date; }));
-        	yScale.domain(d3.extent(rows, function(d) { return d.price; }));
+        	xScale.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
+        	yScale.domain(d3.extent(rows, function(d) { return d.price; })).range([height, 0]);
 
-        	console.log(yScale);
+        	xAxis = d3.svg.axis().scale(xScale);
+        	yAxis = d3.svg.axis().scale(yScale).orient("left");
+        	
 	        //section we wish to apply changes/transitions
 	        var svg = d3.select("#graph").transition();
 
 	        svg.select(".line")
 	        	.duration(500)
-	        	.attr("d", valueline(rows));
+	        	.attr("d", lineValues(rows));
 	        svg.select(".x.axis")
 	        	.duration(500)
 	        	.call(xAxis);
@@ -216,9 +225,13 @@
 	        // call a create graph function that we can swap out if we want to change the default graph
 	        createGraph(points);
 	    });
+
+
 	}
 
-	        createData(DATA);
+	
+
+	createData(DATA);
 
 </script>
 </body>
