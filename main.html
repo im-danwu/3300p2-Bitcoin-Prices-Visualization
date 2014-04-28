@@ -13,10 +13,12 @@
     <div id='inputs'>views: 
         <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
-        <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
-    </div>
-    <div>
-    <h1>HOLY SHIT, I got zoom to work finally! (scroll to zoom)</h1>
+        <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly    
+        <br>
+        Start <input type="date" id="start" value="2013-12-27">
+        End <input type="date" id="end" value="2014-04-20">
+        <button type="button" onclick="newDate(); return false;">Change timeframe</button>
+        <p id="error"></p>
     </div>
     
     <!--graph-->
@@ -28,6 +30,7 @@
     /*
     * global variables
     */
+    
     // holds the bitcoin prices and times
     var points;
     var xScale,
@@ -40,22 +43,20 @@
         left: 45
     };
 
-
-    
     // create canvas for graph
     width = 1100 - margin.left - margin.right;
     height = 600 - margin.top - margin.bottom;
 
-    var xAxis;
+    var xAxis,
+        yAxis;
 
-    var yAxis;
+    var make_x_axis,
+        make_y_axis;
 
-    var make_x_axis;
-
-    var make_y_axis;
-
-    var x, y, zoom, line;
-
+    var x,
+        y,
+        zoom,
+        line;
 
     var svg;
 
@@ -130,17 +131,12 @@
             .ticks(9);
         }
 
-
         svg = d3.select("#graph").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .call(zoom);
-
-
-
-
 
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
@@ -152,13 +148,7 @@
 
         // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
 
-        
-        
-        
-
-
-        // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
-        
+        // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599        
         
         // date/time axis
         xAxis = d3.svg.axis()
@@ -192,19 +182,11 @@
         var chartBody = svg.append("g")
             .attr("clip-path", "url(#clip)");
 
-
-
-
-
         chartBody.append("path")
             .datum(data)
             .attr("class", "line")
             .attr("d", line);
 
-
-
-                
-        // set graph timeframe
         //setTimeframe(xMin, xMax);
         
         
@@ -368,8 +350,55 @@
     
     // TODO: update graph after changing date range
     function newDate() {
-        var start = document.getElementsByName("start").value();
-        console.log(start);
+        // clear previous errors
+        document.getElementById("error").innerHTML = "";
+        
+        // grab user inputs
+        var start = new Date(document.getElementById("start").value);
+        var end = new Date(document.getElementById("end").value);
+                console.log(start,end);
+
+        start = start.toLocaleDateString();
+        end = end.toLocaleDateString();
+        
+                console.log(start,end);
+
+        // check valid date range
+        if (start > end) {
+            document.getElementById("error").innerHTML = "Please enter a valid date range.";
+            return false;
+        }
+
+        // used to splice points array
+        var startIndex,
+            endIndex;
+                
+        // recreate graph with modified date array
+        points.forEach(function(d, i) {
+            var currTime = d.time.toLocaleDateString();
+            if (currTime === start && !startIndex) {
+                console.log(currTime);
+                startIndex = i;
+            };
+            if (currTime === end && !endIndex) {
+                console.log(currTime);
+                endIndex = i;
+            }
+        });
+        
+        // check if indices found
+        if (!startIndex || !endIndex) {
+            document.getElementById("error").innerHTML = "No data for that date range.";
+        }
+
+        // clear graph and title
+        d3.select("svg").remove();
+        d3.select("#timeframe").text("");
+
+        // recreate canvas and graph
+        svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
+        createGraph(points.slice(startIndex, endIndex));
+//        console.log(xScale.domain());
     }
 
      // set the timeframe paragraph
