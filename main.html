@@ -76,13 +76,18 @@
     }
      
     // return formated date Javascript date object (mm/dd/yyyy hh:mm am/pm)
-    function formatDate(date){
+    function formatDate(date,timeframe){
         var month = date.getMonth()+1;
         var day = date.getDate();
         var year = date.getFullYear();
         var time = formatAMPM(date);
-        var formated = month + "/" + day + "/" + year + " " + time;
-        return formated;
+        var formatted = month + "/" + day + "/" + year;
+
+        //if the timeframe is hourly, also include time (otherwise don't because not needed)
+        if (timeframe === "hourly")
+        	formatted += " " + time;
+
+        return formatted;
     }
     
     // makeHover helper functions
@@ -91,7 +96,7 @@
     var formatCurrency = function(d) { return "$" + formatValue(d); };
     
     //hover value display http://bl.ocks.org/mbostock/3902569#index.html
-    var makeHover = function() {
+    var makeHover = function(timeframe) {
 
         //points for hover
         var point = svg.append("g")
@@ -152,7 +157,7 @@
             var d_time = new Date(d.time);
             // redraw the rectangle
             point.attr("transform", "translate(" + x(d_time) + "," + y(d.price) + ")");
-            point.select("#time").text(formatDate(d_time));
+            point.select("#time").text(formatDate(d_time,timeframe));
             point.select("#price").text(formatCurrency(d.price));
 
             // redraw linepointer
@@ -314,7 +319,7 @@
             .attr("d", makeLine);
         
         // Add hover functionality based on what is currently in daData
-        makeHover();
+        makeHover("hourly");
     }
     
     /**
@@ -352,7 +357,11 @@
             svg.select(".point").remove();
             svg.select("#linepointer").remove();
             svg.select(".overlay").remove();
-            makeHover();
+
+            //store the timeframe that was chosen (from radio buttons in the top of the document)
+            var chosenTimeframe = document.querySelector('input[name="timeframe"]:checked').value;
+
+            makeHover(chosenTimeframe);
 	    });
 	}     
 
