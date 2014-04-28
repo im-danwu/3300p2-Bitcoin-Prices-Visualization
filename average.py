@@ -11,7 +11,7 @@ lines = []
 with open('bitcoins-minute.csv') as f:
     lines = [line.strip() for line in f.readlines()]
 
-f = open('bitcoins-daily.csv', 'w')
+f = open('bitcoins-weekly.csv', 'w')
 
 prev = datetime.now()
 stack = []
@@ -19,7 +19,7 @@ for line in lines:
     buy, sell, timestr = line.split(',')
     timestamp = datetime.strptime(timestr, '%Y-%m-%d %H:%M:%S')
 
-    if timestamp.day == prev.day:
+    if timestamp.isocalendar()[1] == prev.isocalendar()[1]:
         stack.append(float(buy))
     else:
         average = avg(stack)
