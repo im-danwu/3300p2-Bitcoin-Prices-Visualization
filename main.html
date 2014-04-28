@@ -87,6 +87,79 @@
         var formated = month + "/" + day + "/" + year + " " + time;
         return formated;
     }
+    
+    //hover value display http://bl.ocks.org/mbostock/3902569#index.html
+    var makeHover = function() {
+        var bisect = d3.bisector(function(d) { return d.time; }).left,
+        formatValue = d3.format(",.2f"),
+        formatCurrency = function(d) { return "$" + formatValue(d); };
+
+        //points for hover
+        var point = svg.append("g")
+            .attr("class", "point");
+//                .style("display", "none");
+
+        // text box holding information about data point
+        point.append("rect")
+            .attr("width", 145)
+            .attr("height", 50)
+            .attr("transform", "translate(-70, -60)");
+
+        point.append("text")
+            .attr("id", "time")
+            .attr("x", -60)
+            .attr("y", -40);
+
+        point.append("text")
+            .attr("id", "price")
+            .attr("x", -25)
+            .attr("y", -20);
+
+        // line from hovered data point going down to x-axis
+        var linepointer = svg.append("line")
+            .attr("id", "linepointer")
+            .attr("y2", height);
+
+        // circles from hovered data point
+        point.append("circle")
+            .attr("r", 5);
+
+        // overlay for hover - creates an area that the hover feature works i.e. same size as the graph
+        svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            // makes hover info show when mouse over overlay
+            .on("mouseover", function() {
+                point.style("display", null);
+                linepointer.style("display", null);
+            })
+            // hides hover info when mouse outside of overlay
+            .on("mouseout", function() {
+                point.style("display", "none");
+                linepointer.style("display", "none");
+            })
+            .on("mousemove", mousemove);
+
+        function mousemove() {
+            var x0 = x.invert(d3.mouse(this)[0]),
+                i = bisect(daData, x0, 1),
+                d0 = daData[i - 1],
+                d1 = daData[i],
+                d = x0 - d0.time > d1.time - x0 ? d1 : d0;
+            
+            // redraw the rectangle
+            point.attr("transform", "translate(" + x(d.time) + "," + y(d.price) + ")");
+            point.select("#time").text(formatDate(d.time));
+            point.select("#price").text(formatCurrency(d.price));
+            
+            // redraw linepointer
+            linepointer
+                .attr("x1", x(d.time))
+                .attr("y1", y(d.price))
+                .attr("x2", x(d.time));
+        }
+    };
 
     /**
     * create graph functions
@@ -211,65 +284,9 @@
             .datum(data)
             .attr("class", "line")
             .attr("d", makeLine);
-                
-        //hover value display http://bl.ocks.org/mbostock/3902569#index.html
-        //=====================Hover indicator point=================================
-        var bisect = d3.bisector(function(d) { return d.time; }).left,
-        formatValue = d3.format(",.2f"),
-        formatCurrency = function(d) { return "$" + formatValue(d); };
-    
-        var point = svg.append("g")
-            .attr("class", "point")
-            .style("display", "none");
-
-        //points for hover
-        point.append("rect")
-            .attr("width", 145)
-            .attr("height", 50)
-            .attr("transform", "translate(-70, -60)");
-
-        point.append("text")
-            .attr("id", "time")
-            .attr("x", -60)
-            .attr("y", -40);
         
-        point.append("text")
-            .attr("id", "price")
-            .attr("x", -25)
-            .attr("y", -20);
-        
-        //lines from hover
-        var linepointer = svg.append("line")
-            .attr("id", "linepointer")
-            .attr("y2", height);
-        
-        //circles from hover
-        point.append("circle")
-            .attr("r", 5);
-        
-        //overlay for hover 
-        svg.append("rect")
-            .attr("class", "overlay")
-            .attr("width", width)
-            .attr("height", height)
-            .on("mouseover", function() { point.style("display", null); })
-            .on("mouseout", function() { point.style("display", "none"); })
-            .on("mousemove", mousemove);
-
-          function mousemove() {
-            var x0 = x.invert(d3.mouse(this)[0]),
-                i = bisect(data, x0, 1),
-                d0 = data[i - 1],
-                d1 = data[i],
-                d = x0 - d0.time > d1.time - x0 ? d1 : d0;
-            point.attr("transform", "translate(" + x(d.time) + "," + y(d.price) + ")");
-            point.select("#time").text(formatDate(d.time));
-            point.select("#price").text(formatCurrency(d.price));
-            linepointer
-                .attr("x1", x(d.time))
-                .attr("y1", y(d.price))
-                .attr("x2", x(d.time));
-          }
+        // Add hover functionality based on what is currently in daData
+        makeHover();
     }
     
     /**
@@ -284,7 +301,7 @@
 	    		d.price = +d.price
 	    	});
 
-	        points = rows;
+	        daData = rows;
 
 	        //return min and max dates for x-axis and prices for y-axis
         	x.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
@@ -302,6 +319,8 @@
 	        svg.select(".y.axis")
 	        	.duration(500)
 	        	.call(yAxis);
+            
+            makeHover();
 	    });
 	}
     
@@ -322,12 +341,12 @@
             return false;
         }
 
-        // used to splice points array
+        // used to splice daData array
         var startIndex,
             endIndex;
                 
         // recreate graph with modified date array
-        points.forEach(function(d, i) {
+        daData.forEach(function(d, i) {
             var currTime = d.time.toLocaleDateString();
             if (currTime === start && !startIndex) {
                 console.log(currTime);
@@ -351,7 +370,7 @@
 
         // recreate canvas and graph
         svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
-        createGraph(points.slice(startIndex, endIndex));
+        createGraph(daData.slice(startIndex, endIndex));
     }
 
     // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
