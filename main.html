@@ -7,8 +7,16 @@
     <p id='timeframe'></p>
     <div id='graph'></div>
     <div id='minigraph'></div>
+    <div id='inputs'>
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateHourly()">Hourly
+    	<input type="radio" name="timeframe" value="daily" onclick="updateDaily()">Daily
+    	<input type="radio" name="timeframe" value="daily" onclick="updateWeekly()">Weekly
+    </div>
     
 <script>
+    // data file to read in
+    var DATA = "bitcoins-hourly.csv";
+    
     // create canvas for graph
     var height = 500;
     var width = 900;
@@ -21,11 +29,56 @@
     var mini = d3.select("#minigraph").append("svg").attr("height", miniHeight).attr("width", miniWidth);
 
     /**
-    * create graph functions
+    * graph functions
     */
 
-    // create minute timeframe graph
-    var minuteGraph = function (data) {
+    // // DEPRECRATED: create minute timeframe graph
+    // var minuteGraph = function (data) {
+    //     // assuming data is in chronological order!
+    //     var xMin = data[0].time;
+    //     var xMax = data[data.length-1].time;
+    //     var xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
+
+    //     var yMin = d3.min(data, function(d) { return d.price; });
+    //     var yMax = d3.max(data, function(d) { return d.price; });
+    //     var yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
+        
+    //     // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
+    //     var area = d3.svg.area()
+    //         .x(function(d) { return xScale(d.time); })
+    //         .y0(height)
+    //         .y1(function(d) { return yScale(d.price); });
+        
+    //     svg.append("path").datum(data).attr("class", "area").attr("d", area);
+        
+    //     // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
+    //     var line = d3.svg.line()
+    //     .x(function(d) { return xScale(d.time); })
+    //     .y(function(d) { return yScale(d.price); });
+
+    //     svg.append("path").attr("class", "line").attr("d", line(data));
+        
+    //     // date/time axis
+    //     var xAxis = d3.svg.axis().scale(xScale);
+    //     svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
+
+    //     // price axis
+    //     var yAxis = d3.svg.axis().scale(yScale).orient("left");
+    //     svg.append("g").attr("class", "axis").call(yAxis);
+                
+    //     // set graph timeframe
+    //     setMinuteTimeframe(xMin, xMax);        
+    // }
+    
+    var hourGraph = function(data) {
+    }
+    
+    var dayGraph = function(data) {
+        
+    }
+    
+
+    var createGraph = function (data) {
         // assuming data is in chronological order!
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
@@ -59,14 +112,39 @@
         svg.append("g").attr("class", "axis").call(yAxis);
                 
         // set graph timeframe
-        setMinuteTimeframe(xMin, xMax);
+        setTimeframe(xMin, xMax);        
     }
-    
+
     /**
     * helper functions
     */
     
-    var setMinuteTimeframe = function(first, last) {
+    // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
+    function formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+    
+    // DEPRECATED: convert from minutes to hours
+    var minutesToHours = function(data) {
+        
+    }
+    
+    // convert from hours to days
+    var hoursToDays = function(data) {  
+    }
+    
+    /*
+    * setting title functions
+    */
+    
+    var setTimeframe = function(first, last) {
         // to cut off day of the week part of string
         var whitespace = first.toDateString().indexOf(" ");
 
@@ -88,38 +166,71 @@
         }
     }
 
-    // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
-    function formatAMPM(date) {
-        var hours = date.getHours();
-        var minutes = date.getMinutes();
-        var ampm = hours >= 12 ? 'pm' : 'am';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        minutes = minutes < 10 ? '0'+minutes : minutes;
-        var strTime = hours + ':' + minutes + ' ' + ampm;
-        return strTime;
-    }
-
     /**
-    * rest of the script
+    * main script
     */
 
     // holds the bitcoin prices and times
     var points = [];
 
     // pull the data for the bitcoins and create the graph
-    d3.csv("bitcoinstest.csv", function(d) {
+    d3.csv(DATA, function(d) {
+        var time = new Date(d.time);
+        
         return {
-            price: d.buying,
-            time: new Date(d.time)
+            price: d.price,
+            time: time,
+            month: time.getMonth(),
+            day: time.getDay(),
+            hour: time.getHours(),
+            minute: time.getMinutes()
         };
     }, function(error, rows) {
         points = rows;
 
         // call a create graph function that we can swap out if we want to change the default graph
-        minuteGraph(points);
+        createGraph(points);
     });
-    
+
+    /**
+	* Update Functions for each timeframe
+    */
+    // function updateMinute() {
+    // 	// pull the data for the bitcoins and create the graph
+	   //  d3.csv("bitcoinstest.csv", function(error, rows) {
+	   //  	rows.forEach(function(d) {
+	   //  		d.date:
+	   //  		d.time:
+	   //  		d.price: d.price;
+
+	   //  	});
+
+	   //      points = rows;
+
+	   //      var yMin =
+	   //      // Scale the range of the data again 
+    //     	x.domain(d3.extent(rows, function(d) { return d.date; }));
+    //         y.domain([0, d3.max(rows, function(d) { return d.price; })]);
+
+	   //      //section we wish to apply changes/transitions
+	   //      var svg = d3.select("#timeframe").transition();
+
+	   //      svg.select(".line")
+	   //      	.duration(500)
+	   //      	.attr("d", valueline(rows));
+	   //      svg.select(".x.axis")
+	   //      	.duration(500)
+	   //      	.call(xAxis);
+	   //      svg.select(".y.axis")
+	   //      	.duration(500)
+	   //      	.call(yAxis);
+
+	   //      // call a create graph function that we can swap out if we want to change the default graph
+	   //      minuteGraph(points);
+	   //  });
+    // }
+
 </script>
+
 </body>
 </html>
