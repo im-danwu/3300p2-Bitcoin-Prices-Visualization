@@ -14,10 +14,13 @@
     </div>
     
 <script>
-    
     /*
     * global variables
     */
+    // holds the bitcoin prices and times
+    var points = [];
+
+    var xScale, yScale;
     
     // data file to read in
     var DATA = "bitcoins-daily.csv";
@@ -34,7 +37,7 @@
     var mini = d3.select("#minigraph").append("svg").attr("height", miniHeight).attr("width", miniWidth);
 
     /**
-    * main functions
+    * create graph functions
     */
 
     // pull the data for the bitcoins and create the graph
@@ -47,8 +50,8 @@
                 time: time,
                 month: time.getMonth(),
                 day: time.getDay(),
-//                hour: time.getHours(),
-//                minute: time.getMinutes()
+               hour: time.getHours(),
+               minute: time.getMinutes()
             };
         }, function(error, rows) {
             points = rows;
@@ -57,8 +60,6 @@
             createGraph(points);
         });
     }
-
-    var xScale, yScale;
 
     var createGraph = function (data) {
         // assuming data is in chronological order!
@@ -94,8 +95,58 @@
         svg.append("g").attr("class", "axis").call(yAxis);
                 
         // set graph timeframe
-        setTimeframe(xMin, xMax);        
+        setTimeframe(xMin, xMax);
+        
+        
+        //hover value display http://bl.ocks.org/mbostock/3902569#index.html
+        var bisect = d3.bisector(function(d) { return d.time; }).left,
+        formatValue = d3.format(",.2f"),
+        formatCurrency = function(d) { return "$" + formatValue(d); };
+    
+    
+        var point = svg.append("g")
+            .attr("class", "point")
+            .style("display", "none");
+
+        point.append("circle")
+            .attr("r", 4.5);
+
+        point.append("text")
+            .attr("x", 9)
+            .attr("dy", ".35em");
+        
+//        var linepointer = svg.append("line")
+//            .attr("x1", xScale(50))
+//            .attr("y1", yScale(710))
+//            .attr("x2", xScale(50))
+//            .attr("y2", yScale(yMin));
+    
+        svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .on("mouseover", function() { point.style("display", null); })
+            .on("mouseout", function() { point.style("display", "none"); })
+            .on("mousemove", mousemove);
+
+  function mousemove() {
+    var x0 = xScale.invert(d3.mouse(this)[0]),
+        i = bisect(data, x0, 1),
+        d0 = data[i - 1],
+        d1 = data[i],
+        d = x0 - d0.time > d1.time - x0 ? d1 : d0;
+    point.attr("transform", "translate(" + xScale(d.time) + "," + yScale(d.price) + ")");
+    point.select("text").text(formatCurrency(d.price));
+    //linepointer.attr("x1", xScale(d.time)).attr("y1", yScale(d.price)).attr("x2", xScale(d.time)).attr("stroke-width", 1);
+  }
+        
+        
     }
+    
+    /**
+    * helper functions
+    */
+
 
     var setTimeframe = function(first, last) {
         // to cut off day of the week part of string
@@ -119,10 +170,6 @@
         }
     }
 
-    /**
-    * helper functions
-    */
-    
     // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
     function formatAMPM(date) {
         var hours = date.getHours();
@@ -134,15 +181,6 @@
         var strTime = hours + ':' + minutes + ' ' + ampm;
         return strTime;
     }
-    
-    /**
-    * main script
-    */
-
-    // holds the bitcoin prices and times
-    var points = [];
-
-    createData(DATA);
     
     /**
 	* Update Functions for each timeframe
@@ -163,7 +201,7 @@
 
         	console.log(yScale);
 	        //section we wish to apply changes/transitions
-	        var svg = d3.select("#timeframe").transition();
+	        var svg = d3.select("#graph").transition();
 
 	        svg.select(".line")
 	        	.duration(500)
@@ -178,9 +216,10 @@
 	        // call a create graph function that we can swap out if we want to change the default graph
 	        createGraph(points);
 	    });
-    }
+	}
+
+	        createData(DATA);
 
 </script>
-
 </body>
 </html>
