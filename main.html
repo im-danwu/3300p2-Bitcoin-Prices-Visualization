@@ -47,8 +47,8 @@
                 time: time,
                 month: time.getMonth(),
                 day: time.getDay(),
-                hour: time.getHours(),
-                minute: time.getMinutes()
+//                hour: time.getHours(),
+//                minute: time.getMinutes()
             };
         }, function(error, rows) {
             points = rows;
@@ -145,42 +145,42 @@
     /**
 	* Update Functions for each timeframe
     */
-    function updateGraph(timeframe) {
-    	if (timeframe === "hourly")
-  			var csvfile = "bitcoins-hourly.csv";
-  		else if (timeframe === "daily")
-
-    	// pull the data for the bitcoins and create the graph
-	    d3.csv("bitcoinstest.csv", function(error, rows) {
-	    	rows.forEach(function(d) {
-	    		d.date:
-
-	    	});
-
-	        points = rows;
-
-	        var yMin =
-	        // Scale the range of the data again 
-        	x.domain(d3.extent(rows, function(d) { return d.date; }));
-            y.domain([0, d3.max(rows, function(d) { return d.price; })]);
-
-	        //section we wish to apply changes/transitions
-	        var svg = d3.select("#timeframe").transition();
-
-	        svg.select(".line")
-	        	.duration(500)
-	        	.attr("d", valueline(rows));
-	        svg.select(".x.axis")
-	        	.duration(500)
-	        	.call(xAxis);
-	        svg.select(".y.axis")
-	        	.duration(500)
-	        	.call(yAxis);
-
-	        // call a create graph function that we can swap out if we want to change the default graph
-	        createGraph(points);
-	    });
-    }
+//    function updateGraph(timeframe) {
+//    	if (timeframe === "hourly")
+//  			var csvfile = "bitcoins-hourly.csv";
+//  		else if (timeframe === "daily")
+//
+//    	// pull the data for the bitcoins and create the graph
+//	    d3.csv("bitcoinstest.csv", function(error, rows) {
+//	    	rows.forEach(function(d) {
+//	    		d.date:
+//
+//	    	});
+//
+//	        points = rows;
+//
+//	        var yMin =
+//	        // Scale the range of the data again 
+//        	x.domain(d3.extent(rows, function(d) { return d.date; }));
+//            y.domain([0, d3.max(rows, function(d) { return d.price; })]);
+//
+//	        //section we wish to apply changes/transitions
+//	        var svg = d3.select("#timeframe").transition();
+//
+//	        svg.select(".line")
+//	        	.duration(500)
+//	        	.attr("d", valueline(rows));
+//	        svg.select(".x.axis")
+//	        	.duration(500)
+//	        	.call(xAxis);
+//	        svg.select(".y.axis")
+//	        	.duration(500)
+//	        	.call(yAxis);
+//
+//	        // call a create graph function that we can swap out if we want to change the default graph
+//	        createGraph(points);
+//	    });
+//    }
 
     function updateHourly() {
         DATA = "bitcoins-hourly.csv"
