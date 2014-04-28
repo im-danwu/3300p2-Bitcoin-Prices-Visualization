@@ -3,9 +3,14 @@ body {
     color: #fff;
     background-color: #292929;
 }
+
+#logo {
+    height: 50px;
+    width: 275px
+}
             
 svg {
-    padding: 100px;
+    padding: 20px;
 }
 
 #timeframe, #inputs {
