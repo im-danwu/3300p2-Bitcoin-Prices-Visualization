@@ -30,24 +30,22 @@
     */
     
     // holds the bitcoin prices and times
-    var points;
-
-    var xScale,
-        yScale;
-    var xAxis,
-        yAxis;
-    var make_x_axis,
-        make_y_axis;
-    var x,
-        y,
-        zoom,
-        line;
+    var daData;
+    
+    // scales
+    var x, y;
+    
+    // axes
+    var xAxis, yAxis;
+    
+    
+    var make_x_axis, make_y_axis;
+    
+    var zoom;
 
     var svg;
 
-    var dadata;
-
-    margin = {
+    var margin = {
         top: 20,
         right: 20,
         bottom: 20,
@@ -56,8 +54,39 @@
     
     // create canvas for graph
     // increase and decrease margin as appropriate for zooming
-    width = 1100 - margin.left - margin.right;
-    height = 600 - margin.top - margin.bottom;
+    var width = 1100 - margin.left - margin.right;
+    var height = 600 - margin.top - margin.bottom;
+    
+    /**
+    * helper functions
+    */
+
+    // draw new line using given array of data points
+    var makeLine = d3.svg.line()
+        .x(function(d) { return x(new Date(d.time)); })
+        .y(function(d) { return y(d.price); })
+    
+    // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
+    function formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+     
+    // return formated date Javascript date object (mm/dd/yyyy hh:mm am/pm)
+    function formatDate(date){
+        var month = date.getMonth();
+        var day = date.getDate();
+        var year = date.getFullYear();
+        var time = formatAMPM(date);
+        var formated = month + "/" + day + "/" + year + " " + time;
+        return formated;
+    }
 
     /**
     * create graph functions
@@ -69,22 +98,18 @@
             var time = new Date(d.time);
             return {
                 price: d.price,
-                time: time,
+                time: time
             };
         }, function(error, rows) {
-            points = rows;
+            daData = rows;
 
             // call a create graph function that we can swap out if we want to change the default graph
-            createGraph(points);
+            createGraph(daData);
         });
     }
 
     // draw the graph with the given data from createData
-    var createGraph = function (data) {
-
-        //so dadata is the global data
-        dadata = data;
-
+    var createGraph = function(data) {
         //===================Make x axis scale=======================
         x = d3.time.scale()
             .domain(d3.extent(data, function (d) {
@@ -114,12 +139,6 @@
             .ticks(9);
         }
 
-        //===================Draw line function=======================
-        line = d3.svg.line()
-            .x(function(d) { return x(d.time); })
-            .y(function(d) { return y(d.price); });
-
-
         //===================Make zoom function=======================
         zoom = d3.behavior.zoom()
             .x(x)
@@ -137,15 +156,11 @@
 
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
-        xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
 
         var yMin = d3.min(data, function(d) { return d.price; });
         var yMax = d3.max(data, function(d) { return d.price; });
-        yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
         
         // date/time axis
-
-
 
         //============Create x axis and append it to svg==================
         xAxis = d3.svg.axis()
@@ -182,7 +197,26 @@
         chartBody.append("path")
             .datum(data)
             .attr("class", "line")
-            .attr("d", line);        
+            .attr("d", makeLine);
+        
+        // Xiao's zooming function
+        function zoomed() {
+            console.log(d3.event.translate);
+            console.log(d3.event.scale);
+            svg.select(".x.axis").call(xAxis);
+            svg.select(".y.axis").call(yAxis);
+            svg.select(".x.grid")
+                .call(make_x_axis()
+                .tickSize(-height, 0, 0)
+                .tickFormat(""));
+            svg.select(".y.grid")
+                .call(make_y_axis()
+                .tickSize(-width, 0, 0)
+                .tickFormat(""));
+            svg.select(".line")
+                .attr("class", "line")
+                .attr("d", makeLine);
+        }
         
         //hover value display http://bl.ocks.org/mbostock/3902569#index.html
         //=====================Hover indicator point=================================
@@ -244,59 +278,9 @@
           }
     }
     
-    // Xiao's zooming function
-    function zoomed() {
-        console.log(d3.event.translate);
-        console.log(d3.event.scale);
-        svg.select(".x.axis").call(xAxis);
-        svg.select(".y.axis").call(yAxis);
-        svg.select(".x.grid")
-            .call(make_x_axis()
-            .tickSize(-height, 0, 0)
-            .tickFormat(""));
-        svg.select(".y.grid")
-            .call(make_y_axis()
-            .tickSize(-width, 0, 0)
-            .tickFormat(""));
-        svg.select(".line")
-            .attr("class", "line")
-            .attr("d", line);
-    }
-
-    /**
-    * helper functions
-    */
-    
-    // http://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
-    function formatAMPM(date) {
-        var hours = date.getHours();
-        var minutes = date.getMinutes();
-        var ampm = hours >= 12 ? 'pm' : 'am';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        minutes = minutes < 10 ? '0'+minutes : minutes;
-        var strTime = hours + ':' + minutes + ' ' + ampm;
-        return strTime;
-    }
-     
-    // return formated date Javascript date object (mm/dd/yyyy hh:mm am/pm)
-    function formatDate(date){
-        var month = date.getMonth();
-        var day = date.getDate();
-        var year = date.getFullYear();
-        var time = formatAMPM(date);
-        var formated = month + "/" + day + "/" + year + " " + time;
-        return formated;
-    }
-    
     /**
     * Update Functions for each timeframe
     */
-
-    // draw new line using given array of data points
-	var lineValues = d3.svg.line()
-						.x(function(d) { return xScale(new Date(d.time)); })
-						.y(function(d) { return yScale(d.price); })
 
     function updateGraph(csvfile) {
     	// pull the data for the bitcoins and create the graph
@@ -309,15 +293,15 @@
 	        points = rows;
 
 	        //return min and max dates for x-axis and prices for y-axis
-        	xScale.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
-        	yScale.domain(d3.extent(rows, function(d) { return d.price; })).range([height, 0]);
+        	x.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
+        	y.domain(d3.extent(rows, function(d) { return d.price; })).range([height, 0]);
         	
 	        //section we wish to apply changes/transitions
 	        var svg = d3.select("#graph").transition();
 
 	        svg.select(".line")
 	        	.duration(500)
-	        	.attr("d", lineValues(rows));
+	        	.attr("d", makeLine(rows));
 	        svg.select(".x.axis")
 	        	.duration(500)
 	        	.call(xAxis);
