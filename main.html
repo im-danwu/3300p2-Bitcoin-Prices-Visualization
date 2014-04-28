@@ -75,7 +75,7 @@
      
     // return formated date Javascript date object (mm/dd/yyyy hh:mm am/pm)
     function formatDate(date){
-        var month = date.getMonth();
+        var month = date.getMonth()+1;
         var day = date.getDate();
         var year = date.getFullYear();
         var time = formatAMPM(date);
@@ -85,7 +85,7 @@
     
     //hover value display http://bl.ocks.org/mbostock/3902569#index.html
     var makeHover = function() {
-        var bisect = d3.bisector(function(d) { return d.time; }).left,
+        var bisect = d3.bisector(function(d) { return new Date(d.time); }).left,
         formatValue = d3.format(",.2f"),
         formatCurrency = function(d) { return "$" + formatValue(d); };
 
@@ -142,7 +142,11 @@
                 d0 = daData[i - 1],
                 d1 = daData[i],
                 d = x0 - d0.time > d1.time - x0 ? d1 : d0;
-            
+
+            console.log(i);
+            //console.log(d0.time);
+            //console.log(d1.time);
+
             // redraw the rectangle
             point.attr("transform", "translate(" + x(new Date(d.time)) + "," + y(d.price) + ")");
             point.select("#time").text(formatDate(new Date(d.time)));
