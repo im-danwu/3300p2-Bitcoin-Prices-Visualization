@@ -15,7 +15,7 @@
     
 <script>
     // data file to read in
-    var DATA = "bitcoins-hourly.csv";
+    var DATA = "bitcoins-daily.csv";
     
     // create canvas for graph
     var height = 500;
@@ -31,52 +31,6 @@
     /**
     * graph functions
     */
-
-    // // DEPRECRATED: create minute timeframe graph
-    // var minuteGraph = function (data) {
-    //     // assuming data is in chronological order!
-    //     var xMin = data[0].time;
-    //     var xMax = data[data.length-1].time;
-    //     var xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
-
-    //     var yMin = d3.min(data, function(d) { return d.price; });
-    //     var yMax = d3.max(data, function(d) { return d.price; });
-    //     var yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
-        
-    //     // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
-    //     var area = d3.svg.area()
-    //         .x(function(d) { return xScale(d.time); })
-    //         .y0(height)
-    //         .y1(function(d) { return yScale(d.price); });
-        
-    //     svg.append("path").datum(data).attr("class", "area").attr("d", area);
-        
-    //     // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
-    //     var line = d3.svg.line()
-    //     .x(function(d) { return xScale(d.time); })
-    //     .y(function(d) { return yScale(d.price); });
-
-    //     svg.append("path").attr("class", "line").attr("d", line(data));
-        
-    //     // date/time axis
-    //     var xAxis = d3.svg.axis().scale(xScale);
-    //     svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
-
-    //     // price axis
-    //     var yAxis = d3.svg.axis().scale(yScale).orient("left");
-    //     svg.append("g").attr("class", "axis").call(yAxis);
-                
-    //     // set graph timeframe
-    //     setMinuteTimeframe(xMin, xMax);        
-    // }
-    
-    var hourGraph = function(data) {
-    }
-    
-    var dayGraph = function(data) {
-        
-    }
-    
 
     var createGraph = function (data) {
         // assuming data is in chronological order!
@@ -130,16 +84,7 @@
         var strTime = hours + ':' + minutes + ' ' + ampm;
         return strTime;
     }
-    
-    // DEPRECATED: convert from minutes to hours
-    var minutesToHours = function(data) {
-        
-    }
-    
-    // convert from hours to days
-    var hoursToDays = function(data) {  
-    }
-    
+
     /*
     * setting title functions
     */
@@ -195,40 +140,42 @@
     /**
 	* Update Functions for each timeframe
     */
-    // function updateMinute() {
-    // 	// pull the data for the bitcoins and create the graph
-	   //  d3.csv("bitcoinstest.csv", function(error, rows) {
-	   //  	rows.forEach(function(d) {
-	   //  		d.date:
-	   //  		d.time:
-	   //  		d.price: d.price;
+    function updateGraph(timeframe) {
+    	if (timeframe === "hourly")
+  			var csvfile = "bitcoins-hourly.csv";
+  		else if (timeframe === "daily")
 
-	   //  	});
+    	// pull the data for the bitcoins and create the graph
+	    d3.csv("bitcoinstest.csv", function(error, rows) {
+	    	rows.forEach(function(d) {
+	    		d.date:
 
-	   //      points = rows;
+	    	});
 
-	   //      var yMin =
-	   //      // Scale the range of the data again 
-    //     	x.domain(d3.extent(rows, function(d) { return d.date; }));
-    //         y.domain([0, d3.max(rows, function(d) { return d.price; })]);
+	        points = rows;
 
-	   //      //section we wish to apply changes/transitions
-	   //      var svg = d3.select("#timeframe").transition();
+	        var yMin =
+	        // Scale the range of the data again 
+        	x.domain(d3.extent(rows, function(d) { return d.date; }));
+            y.domain([0, d3.max(rows, function(d) { return d.price; })]);
 
-	   //      svg.select(".line")
-	   //      	.duration(500)
-	   //      	.attr("d", valueline(rows));
-	   //      svg.select(".x.axis")
-	   //      	.duration(500)
-	   //      	.call(xAxis);
-	   //      svg.select(".y.axis")
-	   //      	.duration(500)
-	   //      	.call(yAxis);
+	        //section we wish to apply changes/transitions
+	        var svg = d3.select("#timeframe").transition();
 
-	   //      // call a create graph function that we can swap out if we want to change the default graph
-	   //      minuteGraph(points);
-	   //  });
-    // }
+	        svg.select(".line")
+	        	.duration(500)
+	        	.attr("d", valueline(rows));
+	        svg.select(".x.axis")
+	        	.duration(500)
+	        	.call(xAxis);
+	        svg.select(".y.axis")
+	        	.duration(500)
+	        	.call(yAxis);
+
+	        // call a create graph function that we can swap out if we want to change the default graph
+	        createGraph(points);
+	    });
+    }
 
 </script>
 
