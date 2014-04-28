@@ -27,12 +27,14 @@
     // holds the bitcoin prices and times
     var daData;
     
+    // points to calculate profit from
+    var profitPoints = {};
+    
     // scales
     var x, y;
     
     // axes
     var xAxis, yAxis;
-    
     
     var make_x_axis, make_y_axis;
     
@@ -83,11 +85,13 @@
         return formated;
     }
     
+    // makeHover helper functions
+    var bisect = d3.bisector(function(d) { return d.time; }).left;
+    var formatValue = d3.format(",.2f");
+    var formatCurrency = function(d) { return "$" + formatValue(d); };
+    
     //hover value display http://bl.ocks.org/mbostock/3902569#index.html
     var makeHover = function() {
-        var bisect = d3.bisector(function(d) { return d.time; }).left,
-        formatValue = d3.format(",.2f"),
-        formatCurrency = function(d) { return "$" + formatValue(d); };
 
         //points for hover
         var point = svg.append("g")
@@ -134,25 +138,56 @@
                 point.style("display", "none");
                 linepointer.style("display", "none");
             })
-            .on("mousemove", mousemove);
-
+            .on("mousemove", mousemove)
+            .on("click", calcProfit);
+        
+        // defines how hover updates information as mouse moves over overlay
         function mousemove() {
             var x0 = x.invert(d3.mouse(this)[0]),
                 i = bisect(daData, x0, 1),
                 d0 = daData[i - 1],
                 d1 = daData[i],
                 d = x0 - d0.time > d1.time - x0 ? d1 : d0;
-            
+
             // redraw the rectangle
             point.attr("transform", "translate(" + x(d.time) + "," + y(d.price) + ")");
             point.select("#time").text(formatDate(d.time));
             point.select("#price").text(formatCurrency(d.price));
-            
+
             // redraw linepointer
             linepointer
                 .attr("x1", x(d.time))
                 .attr("y1", y(d.price))
                 .attr("x2", x(d.time));
+        }
+        
+        // TODO: clicking highlights a point for the profit calculation
+        function calcProfit() {
+            console.log("calc profit");
+            var x0 = x.invert(d3.mouse(this)[0]),
+                i = bisect(daData, x0, 1),
+                d0 = daData[i - 1],
+                d1 = daData[i],
+                d = x0 - d0.time > d1.time - x0 ? d1 : d0;
+            
+            // check if the user already clicked another point
+            if (!profitPoints["first"]) {
+                console.log("first point");
+                profitPoints["first"] = d;
+            }
+            // check if second point is before the first one chronologically
+            else if (profitPoints["first"].time >= d.time) {
+                console.log("invalid date");
+                // reset
+                profitPoints = {};
+            }
+            // calculate profit
+            else {
+                console.log("calculting"+d.price+" - "+profitPoints["first"].price);
+                console.log(d.price - profitPoints["first"].price);
+                // reset
+                profitPoints = {};
+            }
         }
     };
 
@@ -323,6 +358,7 @@
     * main script
     */
     createData("bitcoins-hourly.csv");
+    
 </script>
 </body>
 </html>
