@@ -127,8 +127,6 @@
             .on("zoom", zoomed);
 
         
-
-        
         //===================Create SVG=======================
         svg = d3.select("#graph").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -146,6 +144,10 @@
         yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
         
         // date/time axis
+
+
+
+        //============Create x axis and append it to svg==================
         xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom")
@@ -156,7 +158,7 @@
             .attr("transform", "translate(0," + (height) + ")")
             .call(xAxis);
 
-        // price axis
+        //============Create y axis and append it to svg==================
         yAxis = d3.svg.axis()
         .scale(y)
         .orient("left")
@@ -183,6 +185,7 @@
             .attr("d", line);        
         
         //hover value display http://bl.ocks.org/mbostock/3902569#index.html
+        //=====================Hover indicator point=================================
         var bisect = d3.bisector(function(d) { return d.time; }).left,
         formatValue = d3.format(",.2f"),
         formatCurrency = function(d) { return "$" + formatValue(d); };
@@ -190,8 +193,8 @@
         var point = svg.append("g")
             .attr("class", "point")
             .style("display", "none");
-        
-        //text container from hover
+
+        //points for hover
         point.append("rect")
             .attr("width", 145)
             .attr("height", 50)
