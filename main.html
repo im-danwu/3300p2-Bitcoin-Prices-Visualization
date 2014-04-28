@@ -23,8 +23,6 @@
     
     <!--graph-->
     <div id='graph'></div>
-    <div id='minigraph'></div>
-
     
 <script>
     /*
@@ -33,15 +31,13 @@
     
     // holds the bitcoin prices and times
     var points;
+
     var xScale,
         yScale;
-
     var xAxis,
         yAxis;
-
     var make_x_axis,
         make_y_axis;
-
     var x,
         y,
         zoom,
@@ -62,11 +58,6 @@
     // increase and decrease margin as appropriate for zooming
     width = 1100 - margin.left - margin.right;
     height = 600 - margin.top - margin.bottom;
-
-    // DEPRECATED: mini version of graph with different y axis
-//    var miniHeight = 100;
-//    var miniWidth = 150;    
-//    var mini = d3.select("#minigraph").append("svg").attr("height", miniHeight).attr("width", miniWidth);
 
     /**
     * create graph functions
@@ -124,7 +115,6 @@
         }
 
         //===================Draw line function=======================
-
         line = d3.svg.line()
             .x(function(d) { return x(d.time); })
             .y(function(d) { return y(d.price); });
