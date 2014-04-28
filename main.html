@@ -8,9 +8,9 @@
     <div id='graph'></div>
     <div id='minigraph'></div>
     <div id='inputs'>
-    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
-    	<input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
-    	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
+    	<input type="radio" name="timeframe" value="hourly" onclick="createData('bitcoins-hourly.csv')">Hourly
+    	<input type="radio" name="timeframe" value="daily" onclick="createData('bitcoins-daily.csv')">Daily
+    	<input type="radio" name="timeframe" value="weekly" onclick="createData('bitcoins-weekly.csv')">Weekly
     </div>
     
 <script>
@@ -60,6 +60,8 @@
 
     // draw the graph with the given data from createData
     var createGraph = function (data) {
+
+
         // assuming data is in chronological order!
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
