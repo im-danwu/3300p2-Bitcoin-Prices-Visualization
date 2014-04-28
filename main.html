@@ -8,9 +8,9 @@
     <div id='graph'></div>
     <div id='minigraph'></div>
     <div id='inputs'>
-    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph(\'hourly\')">Hourly
-    	<input type="radio" name="timeframe" value="daily" onclick="updateGraph(\'daily\')">Daily
-    	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph(\'weekly\')">Weekly
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
+    	<input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
+    	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
     </div>
     
 <script>
@@ -47,8 +47,8 @@
                 time: time,
                 month: time.getMonth(),
                 day: time.getDay(),
-                hour: time.getHours(),
-                minute: time.getMinutes()
+//                hour: time.getHours(),
+//                minute: time.getMinutes()
             };
         }, function(error, rows) {
             points = rows;
@@ -58,15 +58,17 @@
         });
     }
 
+    var xScale, yScale;
+
     var createGraph = function (data) {
         // assuming data is in chronological order!
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
-        var xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
+        xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
 
         var yMin = d3.min(data, function(d) { return d.price; });
         var yMax = d3.max(data, function(d) { return d.price; });
-        var yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
+        yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
         
         // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
         var area = d3.svg.area()
@@ -145,14 +147,7 @@
     /**
 	* Update Functions for each timeframe
     */
-    function updateGraph(timeframe) {
-    	if (timeframe === "hourly")
-  			var csvfile = "bitcoins-hourly.csv";
-  		else if (timeframe === "daily")
-  			var csvfile = "bitcoins-daily.csv";
-  		else
-  			var csvfile = "bitcoins-weekly.csv";
-
+    function updateGraph(csvfile) {
     	// pull the data for the bitcoins and create the graph
 	    d3.csv(csvfile, function(error, rows) {
 	    	rows.forEach(function(d) {
@@ -163,9 +158,10 @@
 	        points = rows;
 
 	        //return min and max dates for x-axis and prices for y-axis
-        	x.domain(d3.extent(rows, function(d) { return d.date; }));
-        	y.domain(d3.extent(rows, function(d) { return d.price; }));
+        	xScale.domain(d3.extent(rows, function(d) { return d.date; }));
+        	yScale.domain(d3.extent(rows, function(d) { return d.price; }));
 
+        	console.log(yScale);
 	        //section we wish to apply changes/transitions
 	        var svg = d3.select("#timeframe").transition();
 
@@ -182,10 +178,6 @@
 	        // call a create graph function that we can swap out if we want to change the default graph
 	        createGraph(points);
 	    });
-    }
-
-    function updateHourly() {
-        DATA = "bitcoins-hourly.csv"
     }
 
 </script>
