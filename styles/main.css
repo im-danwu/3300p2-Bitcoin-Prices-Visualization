@@ -8,6 +8,12 @@ body {
     height: 50px;
     width: 275px
 }
+
+.profitPoint {
+    fill: none;
+    stroke: red;
+    stroke-width: 2;
+}
             
 svg {
     padding: 20px;
