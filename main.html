@@ -91,8 +91,8 @@
 
         //points for hover
         var point = svg.append("g")
-            .attr("class", "point")
-            .style("display", "none");
+            .attr("class", "point");
+//                .style("display", "none");
 
         // text box holding information about data point
         point.append("rect")
@@ -292,10 +292,10 @@
     function updateGraph(csvfile) {
     	// pull the data for the bitcoins and create the graph
 	    d3.csv(csvfile, function(error, rows) {
-	    	//rows.forEach(function(d) {
-	    		//d.date = new Date(d.time),
-	    		//d.price = +d.price
-	    	//});
+	    	rows.forEach(function(d) {
+	    		d.date = new Date(d.time),
+	    		d.price = +d.price
+	    	});
 
 	        daData = rows;
 	        //console.log(x.domain());
@@ -316,6 +316,7 @@
 	        	.duration(500)
 	        	.call(yAxis);
 
+	        //remove the grouped elements so we can create new ones
             svg.select(".point").remove();
             svg.select("#linepointer").remove();
             svg.select(".overlay").remove();
