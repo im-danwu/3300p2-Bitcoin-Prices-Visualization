@@ -1,14 +1,32 @@
-p {
-     font-family: Helvetica;
+body {
+    font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;
+    color: #fff;
+    background-color: #292929;
+}
+
+#logo {
+    height: 50px;
+    width: 275px
 }
             
 svg {
-    border: 1px solid black;
-    padding: 30px;
+    padding: 20px;
 }
-        
+
+#timeframe, #inputs {
+ 
+    padding-left: 30px;
+}
+
+#timeframe {
+    color: #FF9900;   
+    font-size: 20px;
+}
+
 #graph {
+ 
     float: left;
+    clear: both;
 }
 
 #minigraph {
@@ -21,22 +39,23 @@ svg {
 .axis line {
     fill: none;
     shape-rendering: crispEdges;
-    stroke: black;
+    stroke: #dcdcdc;
 }
 
 .axis text {
     font-size: 11px;
+    stroke: #dcdcdc;
 }
 
 /* Styling from https://gist.github.com/benjchristensen/2579599 */
 .line {
     fill: none;
-    stroke: steelblue;
-    stroke-width: 2;
+    stroke: #6FB3DA;
+    stroke-width: 1;
 }
 
 .area {
-    fill: lightsteelblue;
+    fill: none;
     stroke-width: 0;
 }
 
@@ -46,6 +65,23 @@ svg {
 }
 
 .point circle {
-  fill: none;
-  stroke: steelblue;
+  fill: #FF9900;
+  stroke: none;
+}
+
+.point rect {
+    fill: #fff;
+    fill-opacity: .2;
+    stroke: none;
+}
+
+#linepointer {
+    stroke: #fff;
+    stroke-width: 1;  
+}
+
+#time, #price {
+    font-size: small;
+    fill: #fff;
+    
 }
