@@ -4,19 +4,22 @@
     <link rel="stylesheet" type="text/css" href="styles/main.css" />
 </head>
 <body>
+    
+    <img id="logo" alt="bitcoin logo" src="styles/bitcoinlogo.png" width="550px" height="100px"/>
+    <!--title message-->
     <p id='timeframe'></p>
-    <div id='graph'></div>
-    <div id='minigraph'></div>
-    <div id='inputs'>
-    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
+    
+    <!--radio buttons to change graph views-->
+    <div id='inputs'>views: 
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
     	<input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
     	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
-        <br>
-        Start <input type="date" id="start" value="2013-12-27">
-        End <input type="date" id="end" value="2014-04-20">
-        <button type="button" onclick="newDate(); return false;">Change timeframe</button>
-        <p id="error"></p>
     </div>
+    
+    <!--graph-->
+    <div id='graph'></div>
+    <div id='minigraph'></div>
+
     
 <script>
     /*
@@ -28,8 +31,8 @@
         yScale;
     
     // create canvas for graph
-    var height = 500;
-    var width = 900;
+    var height = 600;
+    var width = 1100;
 
     var svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
 
@@ -50,6 +53,10 @@
             return {
                 price: d.price,
                 time: time,
+                month: time.getMonth(),
+                day: time.getDay(),
+               hour: time.getHours(),
+               minute: time.getMinutes()
             };
         }, function(error, rows) {
             points = rows;
@@ -61,8 +68,6 @@
 
     // draw the graph with the given data from createData
     var createGraph = function (data) {
-        d3.select('svg').text('')
-
         // assuming data is in chronological order!
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
@@ -107,20 +112,33 @@
         var point = svg.append("g")
             .attr("class", "point")
             .style("display", "none");
-
-        point.append("circle")
-            .attr("r", 4.5);
+        
+        //text container from hover
+        point.append("rect")
+            .attr("width", 145)
+            .attr("height", 50)
+            .attr("transform", "translate(-70, -60)");
 
         point.append("text")
-            .attr("x", 9)
-            .attr("dy", ".35em");
+            .attr("id", "time")
+            .attr("x", -60)
+            .attr("y", -40);
         
-//        var linepointer = svg.append("line")
-//            .attr("x1", xScale(50))
-//            .attr("y1", yScale(710))
-//            .attr("x2", xScale(50))
-//            .attr("y2", yScale(yMin));
-    
+        point.append("text")
+            .attr("id", "price")
+            .attr("x", -25)
+            .attr("y", -20);
+        
+        //lines from hover
+        var linepointer = svg.append("line")
+            .attr("id", "linepointer")
+            .attr("y2", yScale(yMin));
+        
+        //circles from hover
+        point.append("circle")
+            .attr("r", 5);
+        
+        //overlay for hover 
         svg.append("rect")
             .attr("class", "overlay")
             .attr("width", width)
@@ -129,15 +147,19 @@
             .on("mouseout", function() { point.style("display", "none"); })
             .on("mousemove", mousemove);
 
-        function mousemove() {
+          function mousemove() {
             var x0 = xScale.invert(d3.mouse(this)[0]),
                 i = bisect(data, x0, 1),
                 d0 = data[i - 1],
                 d1 = data[i],
                 d = x0 - d0.time > d1.time - x0 ? d1 : d0;
             point.attr("transform", "translate(" + xScale(d.time) + "," + yScale(d.price) + ")");
-            point.select("text").text(formatCurrency(d.price));
-            //linepointer.attr("x1", xScale(d.time)).attr("y1", yScale(d.price)).attr("x2", xScale(d.time)).attr("stroke-width", 1);
+            point.select("#time").text(formatDate(d.time));
+            point.select("#price").text(formatCurrency(d.price));
+            linepointer
+                .attr("x1", xScale(d.time))
+                .attr("y1", yScale(d.price))
+                .attr("x2", xScale(d.time));
           }
     }
     
@@ -148,10 +170,10 @@
 
         // check if looking within one day
         if (first.toDateString() === last.toDateString()) {
-            d3.select("#timeframe").append("text").text("Bitcoin price on "+first.toDateString().substring(whitespace+1)
+            d3.select("#timeframe").append("text").text("Buy prices on "+first.toDateString().substring(whitespace+1)
                                                         +" from"+" "+formatAMPM(first)+" to "+" "+formatAMPM(last))
         } else {
-            d3.select("#timeframe").append("text").text("Bitcoin price from "+first.toDateString().substring(whitespace+1)
+            d3.select("#timeframe").append("text").text("Buy prices from "+first.toDateString().substring(whitespace+1)
                                                         +" "+formatAMPM(first)+" to "+last.toDateString().substring(whitespace+1)+" "+formatAMPM(last))
         }
     }
@@ -171,7 +193,17 @@
         var strTime = hours + ':' + minutes + ' ' + ampm;
         return strTime;
     }
-        
+     
+    //return formated date Javascript date object (mm/dd/yyyy hh:mm am/pm)
+    function formatDate(date){
+        var month = date.getMonth();
+        var day = date.getDate();
+        var year = date.getFullYear();
+        var time = formatAMPM(date);
+        var formated = month + "/" + day + "/" + year + " " + time;
+        return formated;
+    }
+    
     /**
 	* Update Functions for each timeframe
     */
@@ -212,74 +244,30 @@
 
     // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
     function update(dataFile) {
-        // clear graph and title
+        // clear graph
         d3.select("svg").remove();
+        
+        // clear title
         d3.select("#timeframe").text("");
 
-        // recreate canvas and graph
+        // recreate canvas
         svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
+        
+        // recreate graph with new data
         createData(dataFile);
     }
     
     // TODO: update graph after changing date range
     function newDate() {
-        // clear previous errors
-        document.getElementById("error").innerHTML = "";
-        
-        // grab user inputs
-        var start = new Date(document.getElementById("start").value);
-        var end = new Date(document.getElementById("end").value);
-                console.log(start,end);
-
-        start = start.toLocaleDateString();
-        end = end.toLocaleDateString();
-        
-                console.log(start,end);
-
-        // check valid date range
-        if (start > end) {
-            document.getElementById("error").innerHTML = "Please enter a valid date range.";
-            return false;
-        }
-
-        // used to splice points array
-        var startIndex,
-            endIndex;
-        
-                
-        // recreate graph with modified date array
-        points.forEach(function(d, i) {
-            var currTime = d.time.toLocaleDateString();
-            if (currTime === start && !startIndex) {
-                console.log(currTime);
-                startIndex = i;
-            };
-            if (currTime === end && !endIndex) {
-                console.log(currTime);
-                endIndex = i;
-            }
-        });
-        
-        // check if indices found
-        if (!startIndex || !endIndex) {
-            document.getElementById("error").innerHTML = "No data for that date range.";
-        }
-
-        // clear graph and title
-        d3.select("svg").remove();
-        d3.select("#timeframe").text("");
-
-        // recreate canvas and graph
-        svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
-        createGraph(points.slice(startIndex, endIndex));
-//        console.log(xScale.domain());
+        var start = document.getElementsByName("start").value();
+        console.log(start);
     }
 
     /**
     * main script
     */
     createData("bitcoins-hourly.csv");
-        
+    
 </script>
 </body>
 </html>
