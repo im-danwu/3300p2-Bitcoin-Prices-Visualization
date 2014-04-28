@@ -39,3 +39,13 @@ svg {
     fill: lightsteelblue;
     stroke-width: 0;
 }
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.point circle {
+  fill: none;
+  stroke: steelblue;
+}
