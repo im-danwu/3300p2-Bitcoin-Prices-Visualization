@@ -57,17 +57,11 @@
         bottom: 20,
         left: 45
     };
-
-    // data file to read in
-    var DATA = "bitcoins-daily.csv";
     
     // create canvas for graph
     // increase and decrease margin as appropriate for zooming
     width = 1100 - margin.left - margin.right;
     height = 600 - margin.top - margin.bottom;
-
-
-    
 
     // DEPRECATED: mini version of graph with different y axis
 //    var miniHeight = 100;
@@ -256,7 +250,8 @@
                 .attr("x2", x(d.time));
           }
     }
-
+    
+    // Xiao's zooming function
     function zoomed() {
         console.log(d3.event.translate);
         console.log(d3.event.scale);
