@@ -187,20 +187,36 @@
             
             // check if the user already clicked another point
             if (!profitPoints["first"]) {
+                svg.selectAll(".profitPoint").remove();
                 profitPoints["first"] = d;
                 document.getElementById("first").innerHTML = "If you bought for "+formatCurrency(d.price)+" on "+formatDate(d.time);
+                
+            // append circle to clicked point
+            svg.append("circle")
+                .attr("cx", x(d.time))
+                .attr("cy", y(d.price))
+                .attr("r", 7)
+                .attr("class","profitPoint");
             }
             // check if second point is before the first one chronologically
             else if (profitPoints["first"].time >= d.time) {
                 var nodes = document.getElementById("profits").childNodes;
                 for (var i=0; i<nodes.length; i++) {
                     nodes[i].innerHTML = "";
-                    profitPoints = {};
                 }
+                profitPoints = {};
+                svg.selectAll(".profitPoint").remove();
                 document.getElementById("first").innerHTML = "Please pick a valid date range.";
             }
             // calculate profit
             else {
+                // append circle to clicked point
+                svg.append("circle")
+                    .attr("cx", x(d.time))
+                    .attr("cy", y(d.price))
+                    .attr("r", 7)
+                    .attr("class","profitPoint");
+
                 var result = formatCurrency(d.price - profitPoints["first"].price);
                 document.getElementById("result").innerHTML = " and sold on "+formatDate(d.time)+" for "+formatCurrency(d.price)+" you would have made "+result;
                 profitPoints = {};
