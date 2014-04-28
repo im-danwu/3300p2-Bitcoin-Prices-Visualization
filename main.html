@@ -110,6 +110,7 @@
 
     // draw the graph with the given data from createData
     var createGraph = function(data) {
+        
         //===================Make x axis scale=======================
         x = d3.time.scale()
             .domain(d3.extent(data, function (d) {
@@ -145,6 +146,24 @@
             .y(y)
             .on("zoom", zoomed);
 
+        // Xiao's zooming function
+        function zoomed() {
+            console.log(d3.event.translate);
+            console.log(d3.event.scale);
+            svg.select(".x.axis").call(xAxis);
+            svg.select(".y.axis").call(yAxis);
+            svg.select(".x.grid")
+                .call(make_x_axis()
+                .tickSize(-height, 0, 0)
+                .tickFormat(""));
+            svg.select(".y.grid")
+                .call(make_y_axis()
+                .tickSize(-width, 0, 0)
+                .tickFormat(""));
+            svg.select(".line")
+                .attr("class", "line")
+                .attr("d", makeLine);
+        }
         
         //===================Create SVG=======================
         svg = d3.select("#graph").append("svg")
@@ -153,12 +172,6 @@
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .call(zoom);
-
-        var xMin = data[0].time;
-        var xMax = data[data.length-1].time;
-
-        var yMin = d3.min(data, function(d) { return d.price; });
-        var yMax = d3.max(data, function(d) { return d.price; });
         
         // date/time axis
 
@@ -198,26 +211,7 @@
             .datum(data)
             .attr("class", "line")
             .attr("d", makeLine);
-        
-        // Xiao's zooming function
-        function zoomed() {
-            console.log(d3.event.translate);
-            console.log(d3.event.scale);
-            svg.select(".x.axis").call(xAxis);
-            svg.select(".y.axis").call(yAxis);
-            svg.select(".x.grid")
-                .call(make_x_axis()
-                .tickSize(-height, 0, 0)
-                .tickFormat(""));
-            svg.select(".y.grid")
-                .call(make_y_axis()
-                .tickSize(-width, 0, 0)
-                .tickFormat(""));
-            svg.select(".line")
-                .attr("class", "line")
-                .attr("d", makeLine);
-        }
-        
+                
         //hover value display http://bl.ocks.org/mbostock/3902569#index.html
         //=====================Hover indicator point=================================
         var bisect = d3.bisector(function(d) { return d.time; }).left,
@@ -247,7 +241,7 @@
         //lines from hover
         var linepointer = svg.append("line")
             .attr("id", "linepointer")
-            .attr("y2", y(yMin));
+            .attr("y2", height);
         
         //circles from hover
         point.append("circle")
