@@ -7,6 +7,11 @@
     <p id='timeframe'></p>
     <div id='graph'></div>
     <div id='minigraph'></div>
+    <div id='inputs'>
+    	<input type="radio" name="timeframe" value="minute" onclick="updateMinute()">Minute
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateHourly()">Hourly
+    	<input type="radio" name="timeframe" value="daily" onclick="updateDaily()">Daily
+    </div>
     
 <script>
     // data file to read in
@@ -155,7 +160,35 @@
         // call a create graph function that we can swap out if we want to change the default graph
         minuteGraph(points);
     });
-    
+
+    /**
+	* Update Functions for each timeframe
+    */
+    function updateMinute() {
+    	// pull the data for the bitcoins and create the graph
+	    d3.csv("bitcoinstest.csv", function(d) {
+	        var time = new Date(d.time);
+	        
+	        return {
+	            price: d.buying,
+	            time: time,
+	            month: time.getMonth(),
+	            day: time.getDay(),
+	            hour: time.getHours(),
+	            minute: time.getMinutes()
+	        };
+	    }, function(error, rows) {
+	        points = rows;
+
+	        //section we wish to apply changes/transitions
+	        var svg = d3.select("#timeframe").transition();
+
+	        // call a create graph function that we can swap out if we want to change the default graph
+	        minuteGraph(points);
+	    });
+    }
+
 </script>
+
 </body>
 </html>
