@@ -60,7 +60,7 @@
 
     // draw the graph with the given data from createData
     var createGraph = function (data) {
-
+        d3.select('svg').text('')
 
         // assuming data is in chronological order!
         var xMin = data[0].time;
