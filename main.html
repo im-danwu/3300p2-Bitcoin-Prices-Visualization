@@ -11,9 +11,12 @@
     
     <!--radio buttons to change graph views-->
     <div id='inputs'>views: 
-    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
-    	<input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
-    	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
+        <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
+        <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
+        <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
+    </div>
+    <div>
+    <h1>HOLY SHIT, I got zoom to work finally! (scroll to zoom)</h1>
     </div>
     
     <!--graph-->
@@ -29,12 +32,34 @@
     var points;
     var xScale,
         yScale;
+
+    margin = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 45
+    };
+
+
     
     // create canvas for graph
-    var height = 600;
-    var width = 1100;
+    width = 1100 - margin.left - margin.right;
+    height = 600 - margin.top - margin.bottom;
 
-    var svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
+    var xAxis;
+
+    var yAxis;
+
+    var make_x_axis;
+
+    var make_y_axis;
+
+    var x, y, zoom, line;
+
+
+    var svg;
+
+    var dadata;
 
     // DEPRECATED: mini version of graph with different y axis
 //    var miniHeight = 100;
@@ -68,7 +93,55 @@
 
     // draw the graph with the given data from createData
     var createGraph = function (data) {
+        dadata = data;
         // assuming data is in chronological order!
+        x = d3.time.scale()
+            .domain(d3.extent(data, function (d) {
+            return d.time;
+        }))
+            .range([0, width]);
+
+        y = d3.scale.linear()
+            .domain(d3.extent(data, function (d) {
+            return d.price;
+        }))
+            .range([height, 0]);
+
+        line = d3.svg.line()
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(d.price); });
+
+        zoom = d3.behavior.zoom()
+            .x(x)
+            .y(y)
+            .on("zoom", zoomed);
+
+        make_x_axis = function () {
+            return d3.svg.axis()
+                .scale(x)
+                .orient("bottom")
+                .ticks(9);
+        };
+
+        make_y_axis = function () {
+        return d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .ticks(9);
+        }
+
+
+        svg = d3.select("#graph").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .call(zoom);
+
+
+
+
+
         var xMin = data[0].time;
         var xMax = data[data.length-1].time;
         xScale = d3.time.scale().domain([xMin, xMax]).range([0, width]);
@@ -78,30 +151,61 @@
         yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
 
         // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
-        var area = d3.svg.area()
-            .x(function(d) { return xScale(d.time); })
-            .y0(height)
-            .y1(function(d) { return yScale(d.price); });
-        
-        svg.append("path").datum(data).attr("class", "area").attr("d", area);
-        
-        // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
-        var line = d3.svg.line()
-        .x(function(d) { return xScale(d.time); })
-        .y(function(d) { return yScale(d.price); });
 
-        svg.append("path").attr("class", "line").attr("d", line(data));
+        
+        
+        
+
+
+        // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599
+        
         
         // date/time axis
-        var xAxis = d3.svg.axis().scale(xScale);
-        svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (height) + ")").call(xAxis);
+        xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+        .ticks(20);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + (height) + ")")
+            .call(xAxis);
 
         // price axis
-        var yAxis = d3.svg.axis().scale(yScale).orient("left");
-        svg.append("g").attr("class", "axis").call(yAxis);
+        yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .ticks(10);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        var clip = svg.append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", width)
+            .attr("height", height);
+
+        var chartBody = svg.append("g")
+            .attr("clip-path", "url(#clip)");
+
+
+
+
+
+        chartBody.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line);
+
+
+
                 
         // set graph timeframe
-        setTimeframe(xMin, xMax);
+        //setTimeframe(xMin, xMax);
         
         
         //hover value display http://bl.ocks.org/mbostock/3902569#index.html
@@ -132,7 +236,7 @@
         //lines from hover
         var linepointer = svg.append("line")
             .attr("id", "linepointer")
-            .attr("y2", yScale(yMin));
+            .attr("y2", y(yMin));
         
         //circles from hover
         point.append("circle")
@@ -148,35 +252,40 @@
             .on("mousemove", mousemove);
 
           function mousemove() {
-            var x0 = xScale.invert(d3.mouse(this)[0]),
+            var x0 = x.invert(d3.mouse(this)[0]),
                 i = bisect(data, x0, 1),
                 d0 = data[i - 1],
                 d1 = data[i],
                 d = x0 - d0.time > d1.time - x0 ? d1 : d0;
-            point.attr("transform", "translate(" + xScale(d.time) + "," + yScale(d.price) + ")");
+            point.attr("transform", "translate(" + x(d.time) + "," + y(d.price) + ")");
             point.select("#time").text(formatDate(d.time));
             point.select("#price").text(formatCurrency(d.price));
             linepointer
-                .attr("x1", xScale(d.time))
-                .attr("y1", yScale(d.price))
-                .attr("x2", xScale(d.time));
+                .attr("x1", x(d.time))
+                .attr("y1", y(d.price))
+                .attr("x2", x(d.time));
           }
     }
-    
-    // set the timeframe paragraph
-    var setTimeframe = function(first, last) {
-        // to cut off day of the week part of string
-        var whitespace = first.toDateString().indexOf(" ");
 
-        // check if looking within one day
-        if (first.toDateString() === last.toDateString()) {
-            d3.select("#timeframe").append("text").text("Buy prices on "+first.toDateString().substring(whitespace+1)
-                                                        +" from"+" "+formatAMPM(first)+" to "+" "+formatAMPM(last))
-        } else {
-            d3.select("#timeframe").append("text").text("Buy prices from "+first.toDateString().substring(whitespace+1)
-                                                        +" "+formatAMPM(first)+" to "+last.toDateString().substring(whitespace+1)+" "+formatAMPM(last))
-        }
+    function zoomed() {
+        console.log(d3.event.translate);
+        console.log(d3.event.scale);
+        svg.select(".x.axis").call(xAxis);
+        svg.select(".y.axis").call(yAxis);
+        svg.select(".x.grid")
+            .call(make_x_axis()
+            .tickSize(-height, 0, 0)
+            .tickFormat(""));
+        svg.select(".y.grid")
+            .call(make_y_axis()
+            .tickSize(-width, 0, 0)
+            .tickFormat(""));
+        svg.select(".line")
+            .attr("class", "line")
+            .attr("d", line);
     }
+    
+   
 
     /**
     * helper functions
@@ -205,41 +314,41 @@
     }
     
     /**
-	* Update Functions for each timeframe
+    * Update Functions for each timeframe
     */
     
     // update the graph WITH animations after user selects new timeframe
     function updateGraph(csvfile) {
-    	// pull the data for the bitcoins and create the graph
-	    d3.csv(csvfile, function(error, rows) {
-	    	rows.forEach(function(d) {
-	    		d.date =  new Date(d.time),
-	    		d.price = +d.price
-	    	});
+        // pull the data for the bitcoins and create the graph
+        d3.csv(csvfile, function(error, rows) {
+            rows.forEach(function(d) {
+                d.date =  new Date(d.time),
+                d.price = +d.price
+            });
 
-	        points = rows;
+            points = rows;
 
-	        //return min and max dates for x-axis and prices for y-axis
-        	xScale.domain(d3.extent(rows, function(d) { return d.date; }));
-        	yScale.domain(d3.extent(rows, function(d) { return d.price; }));
+            //return min and max dates for x-axis and prices for y-axis
+            xScale.domain(d3.extent(rows, function(d) { return d.date; }));
+            yScale.domain(d3.extent(rows, function(d) { return d.price; }));
 
-        	console.log(yScale);
-	        //section we wish to apply changes/transitions
-	        var svg = d3.select("#graph").transition();
+            console.log(yScale);
+            //section we wish to apply changes/transitions
+            var svg = d3.select("#graph").transition();
 
-	        svg.select(".line")
-	        	.duration(500)
-	        	.attr("d", valueline(rows));
-	        svg.select(".x.axis")
-	        	.duration(500)
-	        	.call(xAxis);
-	        svg.select(".y.axis")
-	        	.duration(500)
-	        	.call(yAxis);
+            svg.select(".line")
+                .duration(500)
+                .attr("d", valueline(rows));
+            svg.select(".x.axis")
+                .duration(500)
+                .call(xAxis);
+            svg.select(".y.axis")
+                .duration(500)
+                .call(yAxis);
 
-	        // call a create graph function that we can swap out if we want to change the default graph
-	        createGraph(points);
-	    });
+            // call a create graph function that we can swap out if we want to change the default graph
+            createGraph(points);
+        });
     }
 
     // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
@@ -261,6 +370,21 @@
     function newDate() {
         var start = document.getElementsByName("start").value();
         console.log(start);
+    }
+
+     // set the timeframe paragraph
+    var setTimeframe = function(first, last) {
+        // to cut off day of the week part of string
+        var whitespace = first.toDateString().indexOf(" ");
+
+        // check if looking within one day
+        if (first.toDateString() === last.toDateString()) {
+            d3.select("#timeframe").append("text").text("Buy prices on "+first.toDateString().substring(whitespace+1)
+                                                        +" from"+" "+formatAMPM(first)+" to "+" "+formatAMPM(last))
+        } else {
+            d3.select("#timeframe").append("text").text("Buy prices from "+first.toDateString().substring(whitespace+1)
+                                                        +" "+formatAMPM(first)+" to "+last.toDateString().substring(whitespace+1)+" "+formatAMPM(last))
+        }
     }
 
     /**
