@@ -17,11 +17,11 @@
         <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
     </div>
     
+    <p>Click two different points to see their profit!</p>
     <div id='profits'>
-        <p>Click two different points to see their profit!</p>
-        <p id='first'></p>
-        <p id='second'></p>
-        <p id='result'></p>
+        <span id='first'></span>
+        <span id='second'></span>
+        <span id='result'></span>
     </div>
     
     <!--graph-->
@@ -96,7 +96,14 @@
     // makeHover helper functions
     var bisect = d3.bisector(function(d) { return new Date(d.time); }).left;
     var formatValue = d3.format(",.2f");
-    var formatCurrency = function(d) { return "$" + formatValue(d); };
+    var formatCurrency = function(d) {
+        if (d > 0) {
+            return "$" + formatValue(d);
+        }
+        else {
+            return "-$" + -formatValue(d);
+        }
+    };
     
     //hover value display http://bl.ocks.org/mbostock/3902569#index.html
     var makeHover = function() {
@@ -168,12 +175,10 @@
                 .attr("x1", x(d_time))
                 .attr("y1", y(d.price))
                 .attr("x2", x(d_time));
-
         }
         
         // TODO: clicking highlights a point for the profit calculation
         function calcProfit() {
-            console.log("calc profit");
             var x0 = x.invert(d3.mouse(this)[0]),
                 i = bisect(daData, x0, 1),
                 d0 = daData[i - 1],
@@ -182,21 +187,22 @@
             
             // check if the user already clicked another point
             if (!profitPoints["first"]) {
-                console.log("first point");
                 profitPoints["first"] = d;
                 document.getElementById("first").innerHTML = "If you bought for "+formatCurrency(d.price)+" on "+formatDate(d.time);
             }
             // check if second point is before the first one chronologically
             else if (profitPoints["first"].time >= d.time) {
-                console.log("invalid date");
-                // reset
-                profitPoints = {};
+                var nodes = document.getElementById("profits").childNodes;
+                for (var i=0; i<nodes.length; i++) {
+                    nodes[i].innerHTML = "";
+                    profitPoints = {};
+                }
+                document.getElementById("first").innerHTML = "Please pick a valid date range.";
             }
             // calculate profit
             else {
-                console.log("calculting"+d.price+" - "+profitPoints["first"].price);
-                console.log(d.price - profitPoints["first"].price);
-                // reset
+                var result = formatCurrency(d.price - profitPoints["first"].price);
+                document.getElementById("result").innerHTML = " and sold on "+formatDate(d.time)+" for "+formatCurrency(d.price)+" you would have made "+result;
                 profitPoints = {};
             }
         }
