@@ -57,17 +57,11 @@
         bottom: 20,
         left: 45
     };
-
-    // data file to read in
-    var DATA = "bitcoins-daily.csv";
     
     // create canvas for graph
     // increase and decrease margin as appropriate for zooming
     width = 1100 - margin.left - margin.right;
     height = 600 - margin.top - margin.bottom;
-
-
-    
 
     // DEPRECATED: mini version of graph with different y axis
 //    var miniHeight = 100;
@@ -82,14 +76,9 @@
     var createData = function(dataFile) {
         d3.csv(dataFile, function(d) {
             var time = new Date(d.time);
-
             return {
                 price: d.price,
                 time: time,
-                month: time.getMonth(),
-                day: time.getDay(),
-               hour: time.getHours(),
-               minute: time.getMinutes()
             };
         }, function(error, rows) {
             points = rows;
@@ -163,15 +152,14 @@
         var yMin = d3.min(data, function(d) { return d.price; });
         var yMax = d3.max(data, function(d) { return d.price; });
         yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
-
-        // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
-
-        // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599        
         
         // date/time axis
+<<<<<<< HEAD
 
 
         //============Create x axis and append it to svg==================
+=======
+>>>>>>> e07ac29f2bc264d1acc2a18ee0197d0639c4abee
         xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom")
@@ -206,10 +194,7 @@
         chartBody.append("path")
             .datum(data)
             .attr("class", "line")
-            .attr("d", line);
-
-        //setTimeframe(xMin, xMax);
-        
+            .attr("d", line);        
         
         //hover value display http://bl.ocks.org/mbostock/3902569#index.html
         var bisect = d3.bisector(function(d) { return d.time; }).left,
@@ -269,7 +254,8 @@
                 .attr("x2", x(d.time));
           }
     }
-
+    
+    // Xiao's zooming function
     function zoomed() {
         console.log(d3.event.translate);
         console.log(d3.event.scale);
@@ -287,8 +273,6 @@
             .attr("class", "line")
             .attr("d", line);
     }
-    
-   
 
     /**
     * helper functions
@@ -306,7 +290,7 @@
         return strTime;
     }
      
-    //return formated date Javascript date object (mm/dd/yyyy hh:mm am/pm)
+    // return formated date Javascript date object (mm/dd/yyyy hh:mm am/pm)
     function formatDate(date){
         var month = date.getMonth();
         var day = date.getDate();
@@ -320,7 +304,7 @@
     * Update Functions for each timeframe
     */
 
-    //return the line values 
+    // draw new line using given array of data points
 	var lineValues = d3.svg.line()
 						.x(function(d) { return xScale(new Date(d.time)); })
 						.y(function(d) { return yScale(d.price); })
@@ -352,28 +336,7 @@
 	        	.duration(500)
 	        	.call(yAxis);
 	    });
-
-
 	}
-
-	
-
-
-
-    // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
-    function update(dataFile) {
-        // clear graph
-        d3.select("svg").remove();
-        
-        // clear title
-        d3.select("#timeframe").text("");
-
-        // recreate canvas
-        svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
-        
-        // recreate graph with new data
-        createData(dataFile);
-    }
     
     // TODO: update graph after changing date range
     function newDate() {
@@ -383,13 +346,9 @@
         // grab user inputs
         var start = new Date(document.getElementById("start").value);
         var end = new Date(document.getElementById("end").value);
-                console.log(start,end);
-
         start = start.toLocaleDateString();
         end = end.toLocaleDateString();
         
-                console.log(start,end);
-
         // check valid date range
         if (start > end) {
             document.getElementById("error").innerHTML = "Please enter a valid date range.";
@@ -407,6 +366,7 @@
                 console.log(currTime);
                 startIndex = i;
             };
+            
             if (currTime === end && !endIndex) {
                 console.log(currTime);
                 endIndex = i;
@@ -425,10 +385,21 @@
         // recreate canvas and graph
         svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
         createGraph(points.slice(startIndex, endIndex));
-//        console.log(xScale.domain());
     }
 
-     // set the timeframe paragraph
+    // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
+    function update(dataFile) {
+        // clear graph
+        d3.select("svg").remove();        
+        // clear title
+        d3.select("#timeframe").text("");
+        // recreate canvas
+        svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
+        // recreate graph with new data
+        createData(dataFile);
+    }
+
+    // DEPRECATED: set the timeframe paragraph
     var setTimeframe = function(first, last) {
         // to cut off day of the week part of string
         var whitespace = first.toDateString().indexOf(" ");
@@ -442,6 +413,9 @@
                                                         +" "+formatAMPM(first)+" to "+last.toDateString().substring(whitespace+1)+" "+formatAMPM(last))
         }
     }
+    
+    // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
+    // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599        
 
     /**
     * main script
