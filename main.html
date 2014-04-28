@@ -43,9 +43,15 @@
         left: 45
     };
 
+    // data file to read in
+    var DATA = "bitcoins-daily.csv";
+    
     // create canvas for graph
     width = 1100 - margin.left - margin.right;
     height = 600 - margin.top - margin.bottom;
+
+    var xScale,
+    	yScale;
 
     var xAxis,
         yAxis;
@@ -151,6 +157,7 @@
         // line function for converting data to x,y https://gist.github.com/benjchristensen/2579599        
         
         // date/time axis
+
         xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom")
@@ -298,39 +305,49 @@
     /**
     * Update Functions for each timeframe
     */
-    
-    // update the graph WITH animations after user selects new timeframe
+
+    //return the line values 
+	var lineValues = d3.svg.line()
+						.x(function(d) { return xScale(new Date(d.time)); })
+						.y(function(d) { return yScale(d.price); })
+
     function updateGraph(csvfile) {
-        // pull the data for the bitcoins and create the graph
-        d3.csv(csvfile, function(error, rows) {
-            rows.forEach(function(d) {
-                d.date =  new Date(d.time),
-                d.price = +d.price
-            });
+    	// pull the data for the bitcoins and create the graph
+	    d3.csv(csvfile, function(error, rows) {
+	    	rows.forEach(function(d) {
+	    		d.date = new Date(d.time),
+	    		d.price = +d.price
+	    	});
 
-            points = rows;
+	        points = rows;
 
-            //return min and max dates for x-axis and prices for y-axis
-            xScale.domain(d3.extent(rows, function(d) { return d.date; }));
-            yScale.domain(d3.extent(rows, function(d) { return d.price; }));
+	        //return min and max dates for x-axis and prices for y-axis
+        	xScale.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
+        	yScale.domain(d3.extent(rows, function(d) { return d.price; })).range([height, 0]);
+        	
+	        //section we wish to apply changes/transitions
+	        var svg = d3.select("#graph").transition();
 
-            //section we wish to apply changes/transitions
-            var svg = d3.select("#graph").transition();
+	        svg.select(".line")
+	        	.duration(500)
+	        	.attr("d", lineValues(rows));
+	        svg.select(".x.axis")
+	        	.duration(500)
+	        	.call(xAxis);
+	        svg.select(".y.axis")
+	        	.duration(500)
+	        	.call(yAxis);
 
-            svg.select(".line")
-                .duration(500)
-                .attr("d", valueline(rows));
-            svg.select(".x.axis")
-                .duration(500)
-                .call(xAxis);
-            svg.select(".y.axis")
-                .duration(500)
-                .call(yAxis);
+	        // call a create graph function that we can swap out if we want to change the default graph
+	        createGraph(points);
+	    });
 
-            // call a create graph function that we can swap out if we want to change the default graph
-            createGraph(points);
-        });
-    }
+
+	}
+
+	
+
+
 
     // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
     function update(dataFile) {
