@@ -8,10 +8,9 @@
     <div id='graph'></div>
     <div id='minigraph'></div>
     <div id='inputs'>
-    	<input type="radio" name="timeframe" value="minute" onclick="updateMinute()">Minute<br>
-    	<input type="radio" name="timeframe" value="hourly" onclick="updateHourly()">Hourly<br>
-    	<input type="radio" name="timeframe" value="daily" onclick="updateDaily()">Daily<br>
-        <input type="radio" name="timeframe" value="weekly" onclick="updateDaily()">Weekly<br>
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateHourly()">Hourly
+    	<input type="radio" name="timeframe" value="daily" onclick="updateDaily()">Daily
+    	<input type="radio" name="timeframe" value="daily" onclick="updateWeekly()">Weekly
     </div>
     
 <script>
@@ -95,7 +94,7 @@
         // set graph timeframe
         setTimeframe(xMin, xMax);        
     }
-    
+
     var setTimeframe = function(first, last) {
         // to cut off day of the week part of string
         var whitespace = first.toDateString().indexOf(" ");
@@ -171,7 +170,7 @@
     }
     
     function updateHourly() {
-        DATA = "bitcoins-hourly.csv
+        DATA = "bitcoins-hourly.csv"
     }
 
 </script>
