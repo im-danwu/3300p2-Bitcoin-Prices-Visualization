@@ -50,10 +50,6 @@
             return {
                 price: d.price,
                 time: time,
-                month: time.getMonth(),
-                day: time.getDay(),
-               hour: time.getHours(),
-               minute: time.getMinutes()
             };
         }, function(error, rows) {
             points = rows;
@@ -230,13 +226,17 @@
         var start = document.getElementById("start").value;
         var end = document.getElementById("end").value;
         
+        // check valid date range
         if (start > end) {
             document.getElementById("error").innerHTML = "Please enter a valid date range.";
-            return;
+            return false;
         }
         
         console.log("valid");
-
+        // recreate with modified date array
+        points.forEach(function(d) {
+            console.log(d.
+        });
     }
 
     /**
