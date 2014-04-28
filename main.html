@@ -148,8 +148,6 @@
             .on("zoom", zoomed);
 
         
-
-        
         //===================Create SVG=======================
         svg = d3.select("#graph").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -172,6 +170,8 @@
         
         // date/time axis
 
+
+        //============Create x axis and append it to svg==================
         xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom")
@@ -182,7 +182,7 @@
             .attr("transform", "translate(0," + (height) + ")")
             .call(xAxis);
 
-        // price axis
+        //============Create y axis and append it to svg==================
         yAxis = d3.svg.axis()
         .scale(y)
         .orient("left")
