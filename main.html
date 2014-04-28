@@ -105,7 +105,7 @@
         //so dadata is the global data
         dadata = data;
 
-        //x scaling
+        //===================Make x axis scale=======================
         x = d3.time.scale()
             .domain(d3.extent(data, function (d) {
             return d.time;
@@ -119,22 +119,13 @@
                 .ticks(7);
         };
 
+
+        //===================Make y axis scale=======================
         y = d3.scale.linear()
             .domain(d3.extent(data, function (d) {
             return d.price;
         }))
             .range([height, 0]);
-
-        line = d3.svg.line()
-            .x(function(d) { return x(d.time); })
-            .y(function(d) { return y(d.price); });
-
-        zoom = d3.behavior.zoom()
-            .x(x)
-            .y(y)
-            .on("zoom", zoomed);
-
-        
 
         make_y_axis = function () {
         return d3.svg.axis()
@@ -143,6 +134,23 @@
             .ticks(9);
         }
 
+        //===================Draw line function=======================
+
+        line = d3.svg.line()
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(d.price); });
+
+
+        //===================Make zoom function=======================
+        zoom = d3.behavior.zoom()
+            .x(x)
+            .y(y)
+            .on("zoom", zoomed);
+
+        
+
+        
+        //===================Create SVG=======================
         svg = d3.select("#graph").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
