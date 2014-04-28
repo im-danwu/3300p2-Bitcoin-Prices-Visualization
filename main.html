@@ -8,9 +8,9 @@
     <div id='graph'></div>
     <div id='minigraph'></div>
     <div id='inputs'>
-    	<input type="radio" name="timeframe" value="hourly" onclick="updateHourly()">Hourly
-    	<input type="radio" name="timeframe" value="daily" onclick="updateDaily()">Daily
-    	<input type="radio" name="timeframe" value="daily" onclick="updateWeekly()">Weekly
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph(\'hourly\')">Hourly
+    	<input type="radio" name="timeframe" value="daily" onclick="updateGraph(\'daily\')">Daily
+    	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph(\'weekly\')">Weekly
     </div>
     
 <script>
@@ -149,20 +149,22 @@
     	if (timeframe === "hourly")
   			var csvfile = "bitcoins-hourly.csv";
   		else if (timeframe === "daily")
+  			var csvfile = "bitcoins-daily.csv";
+  		else
+  			var csvfile = "bitcoins-weekly.csv";
 
     	// pull the data for the bitcoins and create the graph
-	    d3.csv("bitcoinstest.csv", function(error, rows) {
+	    d3.csv(csvfile, function(error, rows) {
 	    	rows.forEach(function(d) {
-	    		d.date:
-
+	    		d.date =  new Date(d.time),
+	    		d.price = +d.price
 	    	});
 
 	        points = rows;
 
-	        var yMin =
-	        // Scale the range of the data again 
+	        //return min and max dates for x-axis and prices for y-axis
         	x.domain(d3.extent(rows, function(d) { return d.date; }));
-            y.domain([0, d3.max(rows, function(d) { return d.price; })]);
+        	y.domain(d3.extent(rows, function(d) { return d.price; }));
 
 	        //section we wish to apply changes/transitions
 	        var svg = d3.select("#timeframe").transition();
