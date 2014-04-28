@@ -11,7 +11,7 @@
     
     <!--radio buttons to change graph views-->
     <div id='inputs'>views: 
-        <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
+        <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
         <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly    
         <br>
@@ -314,7 +314,6 @@
             xScale.domain(d3.extent(rows, function(d) { return d.date; }));
             yScale.domain(d3.extent(rows, function(d) { return d.price; }));
 
-            console.log(yScale);
             //section we wish to apply changes/transitions
             var svg = d3.select("#graph").transition();
 
