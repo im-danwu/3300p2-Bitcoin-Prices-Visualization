@@ -10,10 +10,18 @@
     <p id='timeframe'></p>
     
     <!--radio buttons to change graph views-->
-    <div id='inputs'>views: 
+    <div id='inputs'>
+        time frames: 
         <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
-        <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly    
+        <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
+    </div>
+    
+    <div id='profits'>
+        <p>Click two different points to see their profit!</p>
+        <p id='first'></p>
+        <p id='second'></p>
+        <p id='result'></p>
     </div>
     
     <!--graph-->
@@ -175,6 +183,7 @@
             if (!profitPoints["first"]) {
                 console.log("first point");
                 profitPoints["first"] = d;
+                document.getElementById("first").innerHTML = "If you bought for "+formatCurrency(d.price)+" on "+formatDate(d.time);
             }
             // check if second point is before the first one chronologically
             else if (profitPoints["first"].time >= d.time) {
