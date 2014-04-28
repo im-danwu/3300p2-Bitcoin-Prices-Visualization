@@ -8,9 +8,14 @@
     <div id='graph'></div>
     <div id='minigraph'></div>
     <div id='inputs'>
-    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
     	<input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
     	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
+        <br>
+        Start <input type="date" id="start" value="2013-12-27">
+        End <input type="date" id="end" value="2014-04-20">
+        <button type="button" onclick="newDate(); return false;">Change timeframe</button>
+        <p id="error"></p>
     </div>
     
 <script>
@@ -101,7 +106,6 @@
         formatValue = d3.format(",.2f"),
         formatCurrency = function(d) { return "$" + formatValue(d); };
     
-
         var point = svg.append("g")
             .attr("class", "point")
             .style("display", "none");
@@ -127,7 +131,7 @@
             .on("mouseout", function() { point.style("display", "none"); })
             .on("mousemove", mousemove);
 
-          function mousemove() {
+        function mousemove() {
             var x0 = xScale.invert(d3.mouse(this)[0]),
                 i = bisect(data, x0, 1),
                 d0 = data[i - 1],
@@ -210,23 +214,27 @@
 
     // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
     function update(dataFile) {
-        // clear graph
+        // clear graph and title
         d3.select("svg").remove();
-        
-        // clear title
         d3.select("#timeframe").text("");
 
-        // recreate canvas
+        // recreate canvas and graph
         svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
-        
-        // recreate graph with new data
         createData(dataFile);
     }
     
     // TODO: update graph after changing date range
     function newDate() {
-        var start = document.getElementsByName("start").value();
-        console.log(start);
+        var start = document.getElementById("start").value;
+        var end = document.getElementById("end").value;
+        
+        if (start > end) {
+            document.getElementById("error").innerHTML = "Please enter a valid date range.";
+            return;
+        }
+        
+        console.log("valid");
+
     }
 
     /**
