@@ -8,39 +8,33 @@
     <div id='graph'></div>
     <div id='minigraph'></div>
     <div id='inputs'>
-    	<input id="hourly" type="radio" name="timeframe" value="hourly" onclick="update('bitcoins-hourly.csv')" checked>Hourly
-<!--    	<input id="daily" type="radio" name="timeframe" value="daily" onclick="update('bitcoins-daily.csv')">Daily-->
-        <input id="daily" type="radio" name="timeframe" value="daily" onclick="updateGraph('daily')">Daily
-    	<input id="weekly" type="radio" name="timeframe" value="daily" onclick="update('bitcoins-weekly.csv')">Weekly
-        <input type="date" name="start" onchange="newDate()">
-        <input type="date" name="end" onchange="newDate()">
+    	<input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')">Hourly
+    	<input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
+    	<input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
     </div>
     
 <script>
-    
     /*
     * global variables
     */
-    
     // holds the bitcoin prices and times
-    var points = [];
+    var points;
+    var xScale,
+        yScale;
     
     // create canvas for graph
     var height = 500;
     var width = 900;
 
     var svg = d3.select("#graph").append("svg").attr("height", height).attr("width", width);
-    
-    var xScale,
-        yScale;
-    
-    var miniHeight = 100;
-    var miniWidth = 150;
-    
-    var mini = d3.select("#minigraph").append("svg").attr("height", miniHeight).attr("width", miniWidth);
+
+    // DEPRECATED: mini version of graph with different y axis
+//    var miniHeight = 100;
+//    var miniWidth = 150;    
+//    var mini = d3.select("#minigraph").append("svg").attr("height", miniHeight).attr("width", miniWidth);
 
     /**
-    * main functions
+    * create graph functions
     */
 
     // pull the data for the bitcoins and create the graph
@@ -53,8 +47,8 @@
                 time: time,
                 month: time.getMonth(),
                 day: time.getDay(),
-                hour: time.getHours(),
-                minute: time.getMinutes()
+               hour: time.getHours(),
+               minute: time.getMinutes()
             };
         }, function(error, rows) {
             points = rows;
@@ -64,6 +58,7 @@
         });
     }
 
+    // draw the graph with the given data from createData
     var createGraph = function (data) {
         // assuming data is in chronological order!
         var xMin = data[0].time;
@@ -73,7 +68,7 @@
         var yMin = d3.min(data, function(d) { return d.price; });
         var yMax = d3.max(data, function(d) { return d.price; });
         yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
-                
+
         // area under line http://www.d3noob.org/2013/01/filling-area-under-graph.html
         var area = d3.svg.area()
             .x(function(d) { return xScale(d.time); })
@@ -98,28 +93,64 @@
         svg.append("g").attr("class", "axis").call(yAxis);
                 
         // set graph timeframe
-        setTimeframe(xMin, xMax);        
-    }
+        setTimeframe(xMin, xMax);
+        
+        
+        //hover value display http://bl.ocks.org/mbostock/3902569#index.html
+        var bisect = d3.bisector(function(d) { return d.time; }).left,
+        formatValue = d3.format(",.2f"),
+        formatCurrency = function(d) { return "$" + formatValue(d); };
+    
 
+        var point = svg.append("g")
+            .attr("class", "point")
+            .style("display", "none");
+
+        point.append("circle")
+            .attr("r", 4.5);
+
+        point.append("text")
+            .attr("x", 9)
+            .attr("dy", ".35em");
+        
+//        var linepointer = svg.append("line")
+//            .attr("x1", xScale(50))
+//            .attr("y1", yScale(710))
+//            .attr("x2", xScale(50))
+//            .attr("y2", yScale(yMin));
+    
+        svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .on("mouseover", function() { point.style("display", null); })
+            .on("mouseout", function() { point.style("display", "none"); })
+            .on("mousemove", mousemove);
+
+          function mousemove() {
+            var x0 = xScale.invert(d3.mouse(this)[0]),
+                i = bisect(data, x0, 1),
+                d0 = data[i - 1],
+                d1 = data[i],
+                d = x0 - d0.time > d1.time - x0 ? d1 : d0;
+            point.attr("transform", "translate(" + xScale(d.time) + "," + yScale(d.price) + ")");
+            point.select("text").text(formatCurrency(d.price));
+            //linepointer.attr("x1", xScale(d.time)).attr("y1", yScale(d.price)).attr("x2", xScale(d.time)).attr("stroke-width", 1);
+          }
+    }
+    
+    // set the timeframe paragraph
     var setTimeframe = function(first, last) {
         // to cut off day of the week part of string
         var whitespace = first.toDateString().indexOf(" ");
 
         // check if looking within one day
         if (first.toDateString() === last.toDateString()) {
-            d3.select("#timeframe").append("text").text("Bitcoin price on "
-                                                        +first.toDateString().substring(whitespace+1)
-                                                        +" from"
-                                                        +" "+formatAMPM(first)
-                                                        +" to "
-                                                        +" "+formatAMPM(last))
+            d3.select("#timeframe").append("text").text("Bitcoin price on "+first.toDateString().substring(whitespace+1)
+                                                        +" from"+" "+formatAMPM(first)+" to "+" "+formatAMPM(last))
         } else {
-            d3.select("#timeframe").append("text").text("Bitcoin price from "
-                                                        +first.toDateString().substring(whitespace+1)
-                                                        +" "+formatAMPM(first)
-                                                        +" to "
-                                                        +last.toDateString().substring(whitespace+1)
-                                                        +" "+formatAMPM(last))
+            d3.select("#timeframe").append("text").text("Bitcoin price from "+first.toDateString().substring(whitespace+1)
+                                                        +" "+formatAMPM(first)+" to "+last.toDateString().substring(whitespace+1)+" "+formatAMPM(last))
         }
     }
 
@@ -143,28 +174,24 @@
 	* Update Functions for each timeframe
     */
     
-    function updateGraph(timeframe) {
-    	if (timeframe === "hourly")
-  			var csvfile = "bitcoins-hourly.csv";
-  		else if (timeframe === "daily")
-
+    // update the graph WITH animations after user selects new timeframe
+    function updateGraph(csvfile) {
     	// pull the data for the bitcoins and create the graph
-	    d3.csv("bitcoins-daily.csv", function(error, rows) {
+	    d3.csv(csvfile, function(error, rows) {
 	    	rows.forEach(function(d) {
-	    		d.date = new Date(d.time),
-                d.price = +d.price
+	    		d.date =  new Date(d.time),
+	    		d.price = +d.price
 	    	});
 
 	        points = rows;
 
-	        // Scale the range of the data again 
+	        //return min and max dates for x-axis and prices for y-axis
         	xScale.domain(d3.extent(rows, function(d) { return d.date; }));
-            yScale.domain([0, d3.max(rows, function(d) { return d.price; })]);
-            
-            console.log(xScale.domain());
+        	yScale.domain(d3.extent(rows, function(d) { return d.price; }));
 
+        	console.log(yScale);
 	        //section we wish to apply changes/transitions
-	        var svg = d3.select("#timeframe").transition();
+	        var svg = d3.select("#graph").transition();
 
 	        svg.select(".line")
 	        	.duration(500)
@@ -181,6 +208,7 @@
 	    });
     }
 
+    // DEPRECATED: update the graph WITHOUT animations after user selects new timeframe
     function update(dataFile) {
         // clear graph
         d3.select("svg").remove();
@@ -195,18 +223,17 @@
         createData(dataFile);
     }
     
-//    function newDate() {
-//        var start = document.getElementsByName("start").value();
-//        console.log(start);
-//    }
+    // TODO: update graph after changing date range
+    function newDate() {
+        var start = document.getElementsByName("start").value();
+        console.log(start);
+    }
 
-    
     /**
     * main script
     */
     createData("bitcoins-hourly.csv");
-
+    
 </script>
-
 </body>
 </html>
