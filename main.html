@@ -70,7 +70,10 @@
 
     var clearProfits = function() {
         svg.selectAll(".profitPoint").remove();
-        document.getElementById
+        var nodes = document.getElementById("profits").childNodes;
+        for (var i=0; i<nodes.length; i++) {
+            nodes[i].innerHTML = " ";
+        }
     }
     // draw new line using given array of data points
     var makeLine = d3.svg.line()
