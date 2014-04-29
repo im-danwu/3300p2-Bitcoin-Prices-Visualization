@@ -280,33 +280,33 @@
         }
 
 //        //===================Make zoom function=======================
-//        zoom = d3.behavior.zoom()
-//            .x(x)
-//            .y(y)
-//            .on("zoom", zoomed);
-//
-//        // Xiao's zooming function
-//        function zoomed() {
-//            console.log(d3.event.translate);
-//            console.log(d3.event.scale);
-//            
-//            // clear profits points
-//            svg.selectAll(".profitPoint").remove();
-//
-//            svg.select(".x.axis").call(xAxis);
-//            svg.select(".y.axis").call(yAxis);
-//            svg.select(".x.grid")
-//                .call(make_x_axis()
-//                .tickSize(-height, 0, 0)
-//                .tickFormat(""));
-//            svg.select(".y.grid")
-//                .call(make_y_axis()
-//                .tickSize(-width, 0, 0)
-//                .tickFormat(""));
-//            svg.select(".line")
-//                .attr("class", "line")
-//                .attr("d", makeLine);
-//        }
+        zoom = d3.behavior.zoom()
+            .x(x)
+            .y(y)
+            .on("zoom", zoomed);
+
+        // Xiao's zooming function
+        function zoomed() {
+            console.log(d3.event.translate);
+            console.log(d3.event.scale);
+            
+            // clear profits points
+            svg.selectAll(".profitPoint").remove();
+
+            svg.select(".x.axis").call(xAxis);
+            svg.select(".y.axis").call(yAxis);
+            svg.select(".x.grid")
+                .call(make_x_axis()
+                .tickSize(-height, 0, 0)
+                .tickFormat(""));
+            svg.select(".y.grid")
+                .call(make_y_axis()
+                .tickSize(-width, 0, 0)
+                .tickFormat(""));
+            svg.select(".line")
+                .attr("class", "line")
+                .attr("d", makeLine);
+        }
         
         //===================Create SVG=======================
         svg = d3.select("#graph").append("svg")
@@ -314,7 +314,7 @@
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-//            .call(zoom);
+            .call(zoom);
         
         // date/time axis
 
