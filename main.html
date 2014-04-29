@@ -24,7 +24,7 @@
     <div id='calculator'><h2>Returns Calculator</h2>   
 
     <div id='profits'>
-        Click on any 2 points on the graph to calculate their profits! 
+        <span id="profittext">Click on any 2 points on the graph to calculate their profits</span>
         <p id= 'error'></p>
         <p id='buy'>Buy date: <span class="profitdata" id="date1"></span><br/>Buy price: <span class="profitdata" id="price1"></span></p>
         <p id='sell'>Sell date: <span class="profitdata" id="date2"></span><br/>Buy price: <span class="profitdata" id="price2"></span></p>
@@ -249,7 +249,6 @@
                 document.getElementById("date2").innerHTML = formatDate(d.time);
                 document.getElementById("price2").innerHTML = formatCurrency(d.price);
                 document.getElementById("result").innerHTML = result;
-
                 profitPoints = {};
             }
         }

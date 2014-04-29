@@ -27,11 +27,15 @@ body {
 
 }
 
+#calculator{
+    float: right;
+    clear: both;
+    width: 300px;
+    margin-top: 40px;
+}
+
 #sell, #buy, #total {
-    display: inline-block;
-    width: 200px;
     color: #FF9900;
-    margin-top: -10px;
 }
 
 #clearprofits {
@@ -43,8 +47,8 @@ body {
     margin-top: -20px;   
 }
 
-h2{
-    text-decoration: underline;   
+#profittext{
+    font-size: small;   
 }
 
 #error{
@@ -76,21 +80,15 @@ svg {
 }
 
 #graph {
- 
     float: left;
-    clear: both;
+    margin-top: -150px;
 }
 
 #minigraph {
     float: left;
     margin-left: 20px;
 }
-
-#profits{
-    max-width: 400px;
-    background: rgba(177, 185, 87, 0.47);
-    padding: 20px;
-}
+        
 /* Styling from http://alignedleft.com/tutorials/d3/axes*/
 .axis path,
 .axis line {
