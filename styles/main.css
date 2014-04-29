@@ -4,14 +4,60 @@ body {
     background-color: #292929;
 }
 
-#logo {
+
+#logo{
     height: 50px;
-    width: 275px
+    width: 275px;
+    float: right;
+}
+
+#inputs{
+    float: right;
+    clear: both;
+    font-size: 20px;
+    margin-top: 10px;
+    color: #FF9900;
+}
+
+#zoomtext{
+    float: right;
+    clear: both;
+    font-size: 15px;
+    font-style: italic;
+
+}
+
+#sell, #buy, #total {
+    display: inline-block;
+    width: 200px;
+    color: #FF9900;
+    margin-top: -10px;
+}
+
+#clearprofits {
+    background-color: #fff;
+    
+}
+
+#profits{
+    margin-top: -20px;   
+}
+
+h2{
+    text-decoration: underline;   
+}
+
+#error{
+    color: red;   
+}
+
+.profitdata{
+    color: #fff;   
 }
 
 .profitPoint {
     fill: none;
-    stroke: red;
+    stroke: #fff;
     stroke-width: 2;
 }
             
