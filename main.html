@@ -16,13 +16,15 @@
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
         <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
     </div>
-    
+
+    <!-- Profits interface -->
     <p>Click two different points to see their profit!</p>
     <div id='profits'>
         <span id='first'></span>
         <span id='second'></span>
         <span id='result'></span>
     </div>
+    <button id='clearProfits' onclick="clearProfits()">Clear Selection</button>
     
     <!--graph-->
     <div id='graph'></div>
@@ -66,6 +68,10 @@
     * helper functions
     */
 
+    var clearProfits = function() {
+        svg.selectAll(".profitPoint").remove();
+        document.getElementById
+    }
     // draw new line using given array of data points
     var makeLine = d3.svg.line()
         .x(function(d) { return x(new Date(d.time)); })
@@ -194,7 +200,7 @@
             
             // check if the user already clicked another point
             if (!profitPoints["first"]) {
-                svg.selectAll(".profitPoint").remove();
+                clearProfits();
                 profitPoints["first"] = d;
                 document.getElementById("first").innerHTML = "If you bought for "+formatCurrency(d.price)+" on "+formatDate(d.time);
                 
@@ -212,7 +218,7 @@
                     nodes[i].innerHTML = "";
                 }
                 profitPoints = {};
-                svg.selectAll(".profitPoint").remove();
+                clearProfits();
                 document.getElementById("first").innerHTML = "Please pick a valid date range.";
             }
             // calculate profit
@@ -290,8 +296,7 @@
             console.log(d3.event.translate);
             console.log(d3.event.scale);
             
-            // clear profits points
-            svg.selectAll(".profitPoint").remove();
+            clearProfits()
 
             svg.select(".x.axis").call(xAxis);
             svg.select(".y.axis").call(yAxis);
@@ -364,8 +369,8 @@
     */
 
     function updateGraph(csvfile) {
-        // clear profits points
-        svg.selectAll(".profitPoint").remove();
+        
+        clearProfits();
         
     	// pull the data for the bitcoins and create the graph
 	    d3.csv(csvfile, function(error, rows) {
