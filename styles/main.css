@@ -85,7 +85,12 @@ svg {
     float: left;
     margin-left: 20px;
 }
-        
+
+#profits{
+    max-width: 400px;
+    background: rgba(177, 185, 87, 0.47);
+    padding: 20px;
+}
 /* Styling from http://alignedleft.com/tutorials/d3/axes*/
 .axis path,
 .axis line {
