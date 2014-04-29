@@ -358,6 +358,9 @@
     */
 
     function updateGraph(csvfile) {
+        // clear profits points
+        svg.selectAll(".profitPoint").remove();
+        
     	// pull the data for the bitcoins and create the graph
 	    d3.csv(csvfile, function(error, rows) {
 	    	rows.forEach(function(d) {
