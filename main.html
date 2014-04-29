@@ -27,7 +27,7 @@
         <span id="profittext">Click on any 2 points on the graph to calculate their profits</span>
         <p id= 'error'></p>
         <p id='buy'>Buy date: <span class="profitdata" id="date1"></span><br/>Buy price: <span class="profitdata" id="price1"></span></p>
-        <p id='sell'>Sell date: <span class="profitdata" id="date2"></span><br/>Buy price: <span class="profitdata" id="price2"></span></p>
+        <p id='sell'>Sell date: <span class="profitdata" id="date2"></span><br/>Sell price: <span class="profitdata" id="price2"></span></p>
         <p id='total'>Total profit: <span class="profitdata" id="result"></span></p>
     </div>
     <button id='clearProfits' onclick="clearProfits()">Clear Selection</button>
@@ -380,7 +380,9 @@
             .attr("d", makeLine);
         
         // Add hover functionality based on what is currently in daData
-        makeHover("hourly");
+        var chosenTimeframe = document.querySelector('input[name="timeframe"]:checked').value;
+
+        makeHover(chosenTimeframe);
     }
     
     /**
