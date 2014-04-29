@@ -234,7 +234,7 @@
                     .attr("class","profitPoint");
 
                 var result = formatCurrency(d.price - profitPoints["first"].price);
-                document.getElementById("result").innerHTML = " and sold on "+formatDate(d.time)+" for "+formatCurrency(d.price)+" you would have made "+result;
+                document.getElementById("result").innerText = " and sold on "+formatDate(d.time)+" for "+formatCurrency(d.price)+" you would have made "+result;
                 profitPoints = {};
             }
         }
