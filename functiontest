@@ -1,0 +1,39 @@
+function updateGraph(csvfile) {
+        
+        clearProfits();
+        
+    	// pull the data for the bitcoins and create the graph
+	    d3.csv(csvfile, function(error, rows) {
+	    	rows.forEach(function(d) {
+	    		d.date = new Date(d.time),
+	    		d.price = +d.price
+	    	});
+
+	        daData = rows;
+	        //return min and max dates for x-axis and prices for y-axis
+        	x.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
+        	y.domain(d3.extent(rows, function(d) { return d.price; })).range([height, 0]);
+	        //section we wish to apply changes/transitions
+	        var svg = d3.select("#graph").transition();
+
+	        svg.select(".line")
+	        	.duration(500)
+	        	.attr("d", makeLine(rows));
+	        svg.select(".x.axis")
+	        	.duration(500)
+	        	.call(xAxis);
+	        svg.select(".y.axis")
+	        	.duration(500)
+	        	.call(yAxis);
+
+	        //remove the grouped elements so we can create new ones
+            svg.select(".point").remove();
+            svg.select("#linepointer").remove();
+            svg.select(".overlay").remove();
+
+            //store the timeframe that was chosen (from radio buttons in the top of the document)
+            var chosenTimeframe = document.querySelector('input[name="timeframe"]:checked').value;
+
+            makeHover(chosenTimeframe);
+	    });
+	}     

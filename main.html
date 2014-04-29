@@ -13,9 +13,9 @@
     <!--radio buttons to change graph views-->
     <div id='inputs'>
         change view:
-        <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
-        <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
-        <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
+        <input type="radio" name="timeframe" value="hourly" onclick="createData('bitcoins-hourly.csv')" checked>Hourly
+        <input type="radio" name="timeframe" value="daily" onclick="createData('bitcoins-daily.csv')">Daily
+        <input type="radio" name="timeframe" value="weekly" onclick="createData('bitcoins-weekly.csv')">Weekly
     </div>
 
     <div id="zoomtext">Scroll on any part of the graph to zoom in!</div>
@@ -278,7 +278,7 @@
 
     // draw the graph with the given data from createData
     var createGraph = function(data) {
-        
+        d3.select('svg').remove();
         //===================Make x axis scale=======================
         x = d3.time.scale()
             .domain(d3.extent(data, function (d) { return d.time; }))
