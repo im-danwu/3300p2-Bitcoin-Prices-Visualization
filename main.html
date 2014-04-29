@@ -289,6 +289,10 @@
         function zoomed() {
             console.log(d3.event.translate);
             console.log(d3.event.scale);
+            
+            // clear profits points
+            svg.selectAll(".profitPoint").remove();
+
             svg.select(".x.axis").call(xAxis);
             svg.select(".y.axis").call(yAxis);
             svg.select(".x.grid")
