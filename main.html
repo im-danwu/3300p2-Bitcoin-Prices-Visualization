@@ -11,7 +11,7 @@
     
     <!--radio buttons to change graph views-->
     <div id='inputs'>
-        time frames: 
+        time frames:
         <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
         <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
@@ -51,7 +51,7 @@
     var svg;
 
     var margin = {
-        top: 20,
+        top: 40,
         right: 20,
         bottom: 20,
         left: 45
@@ -182,7 +182,7 @@
                 .attr("x2", x(d_time));
         }
         
-        // TODO: clicking highlights a point for the profit calculation
+        // clicking highlights a point for the profit calculation
         function calcProfit() {
             var x0 = x.invert(d3.mouse(this)[0]),
                 i = bisect(daData, x0, 1),
@@ -277,34 +277,34 @@
             .ticks(9);
         }
 
-        //===================Make zoom function=======================
-        zoom = d3.behavior.zoom()
-            .x(x)
-            .y(y)
-            .on("zoom", zoomed);
-
-        // Xiao's zooming function
-        function zoomed() {
-            console.log(d3.event.translate);
-            console.log(d3.event.scale);
-            
-            // clear profits points
-            svg.selectAll(".profitPoint").remove();
-
-            svg.select(".x.axis").call(xAxis);
-            svg.select(".y.axis").call(yAxis);
-            svg.select(".x.grid")
-                .call(make_x_axis()
-                .tickSize(-height, 0, 0)
-                .tickFormat(""));
-            svg.select(".y.grid")
-                .call(make_y_axis()
-                .tickSize(-width, 0, 0)
-                .tickFormat(""));
-            svg.select(".line")
-                .attr("class", "line")
-                .attr("d", makeLine);
-        }
+//        //===================Make zoom function=======================
+//        zoom = d3.behavior.zoom()
+//            .x(x)
+//            .y(y)
+//            .on("zoom", zoomed);
+//
+//        // Xiao's zooming function
+//        function zoomed() {
+//            console.log(d3.event.translate);
+//            console.log(d3.event.scale);
+//            
+//            // clear profits points
+//            svg.selectAll(".profitPoint").remove();
+//
+//            svg.select(".x.axis").call(xAxis);
+//            svg.select(".y.axis").call(yAxis);
+//            svg.select(".x.grid")
+//                .call(make_x_axis()
+//                .tickSize(-height, 0, 0)
+//                .tickFormat(""));
+//            svg.select(".y.grid")
+//                .call(make_y_axis()
+//                .tickSize(-width, 0, 0)
+//                .tickFormat(""));
+//            svg.select(".line")
+//                .attr("class", "line")
+//                .attr("d", makeLine);
+//        }
         
         //===================Create SVG=======================
         svg = d3.select("#graph").append("svg")
@@ -312,7 +312,7 @@
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .call(zoom);
+//            .call(zoom);
         
         // date/time axis
 
