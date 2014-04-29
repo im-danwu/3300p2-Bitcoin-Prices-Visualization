@@ -94,6 +94,8 @@
         //if the timeframe is hourly, also include time (otherwise don't because not needed)
         if (timeframe === "hourly")
         	formatted += " " + time;
+        else if (timeframe === "weekly")
+        	formatted = "Week of " + formatted;
 
         return formatted;
     }
