@@ -11,14 +11,15 @@
     
     <!--radio buttons to change graph views-->
     <div id='inputs'>
-        time frames:
+        change view:
         <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
         <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
     </div>
 
     <!-- Profits interface -->
-    <p>Click two different points to see their profit!</p>
+    <p>Click two different points to see their profits!</p>
+
     <div id='profits'>
         <span id='first'></span>
         <span id='second'></span>
@@ -205,7 +206,8 @@
             if (!profitPoints["first"]) {
                 clearProfits();
                 profitPoints["first"] = d;
-                document.getElementById("first").innerHTML = "If you bought for "+formatCurrency(d.price)+" on "+formatDate(d.time);
+                document.getElementById("first").innerHTML = " <br> Buy date: " + formatDate(d.time) + 
+                    " <br> Buy price: " + formatCurrency(d.price);
                 
             // append circle to clicked point
             svg.append("circle")
@@ -221,8 +223,10 @@
                     nodes[i].innerHTML = "";
                 }
                 profitPoints = {};
+
                 clearProfits();
-                document.getElementById("first").innerHTML = "Please pick a valid date range.";
+                document.getElementById("first").innerHTML = "<span id='error'>Please pick a valid date range.</span>";
+
             }
             // calculate profit
             else {
@@ -234,7 +238,13 @@
                     .attr("class","profitPoint");
 
                 var result = formatCurrency(d.price - profitPoints["first"].price);
+<<<<<<< HEAD
                 document.getElementById("result").innerText = " and sold on "+formatDate(d.time)+" for "+formatCurrency(d.price)+" you would have made "+result;
+=======
+                document.getElementById("result").innerHTML = " Sell date: "+formatDate(d.time)+
+                    "<br> Sell price"+formatCurrency(d.price)+
+                    " <br> Profit: "+result;
+>>>>>>> b829e08ed6c26576bf5f0822730ccc3703187791
                 profitPoints = {};
             }
         }
