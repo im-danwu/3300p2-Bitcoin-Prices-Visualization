@@ -5,24 +5,34 @@
 </head>
 <body>
     
-    <img id="logo" alt="bitcoin logo" src="styles/bitcoinlogo.png"/>
-    <!--title message-->
+    <img id='logo' alt="bitcoin logo" src="styles/bitcoinlogo.png"/>
+
+    
     <p id='timeframe'></p>
     
     <!--radio buttons to change graph views-->
     <div id='inputs'>
-        time frames: 
+        change view:
         <input type="radio" name="timeframe" value="hourly" onclick="updateGraph('bitcoins-hourly.csv')" checked>Hourly
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
         <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
     </div>
-    
-    <p>Click two different points to see their profit!</p>
+
+    <div id="zoomtext">Scroll on any part of the graph to zoom in!</div>
+        
+    <!-- Profits interface -->
+    <div id='calculator'><h2>Returns Calculator</h2>   
+
     <div id='profits'>
-        <span id='first'></span>
-        <span id='second'></span>
-        <span id='result'></span>
+        <span id="profittext">Click on any 2 points on the graph to calculate their profits</span>
+        <p id= 'error'></p>
+        <p id='buy'>Buy date: <span class="profitdata" id="date1"></span><br/>Buy price: <span class="profitdata" id="price1"></span></p>
+        <p id='sell'>Sell date: <span class="profitdata" id="date2"></span><br/>Buy price: <span class="profitdata" id="price2"></span></p>
+        <p id='total'>Total profit: <span class="profitdata" id="result"></span></p>
     </div>
+    <button id='clearProfits' onclick="clearProfits()">Clear Selection</button>
+    </div>
+    
     
     <!--graph-->
     <div id='graph'></div>
@@ -51,7 +61,7 @@
     var svg;
 
     var margin = {
-        top: 20,
+        top: 40,
         right: 20,
         bottom: 20,
         left: 45
@@ -66,6 +76,13 @@
     * helper functions
     */
 
+    var clearProfits = function() {
+        svg.selectAll(".profitPoint").remove();
+        var nodes = document.getElementsByClassName("profitdata");
+        for (var i=0; i<nodes.length; i++) {
+            nodes[i].innerHTML = " ";
+        }
+    }
     // draw new line using given array of data points
     var makeLine = d3.svg.line()
         .x(function(d) { return x(new Date(d.time)); })
@@ -118,15 +135,15 @@
 
         //points for hover
         var point = svg.append("g")
-            .attr("class", "point");
-//                .style("display", "none");
+            .attr("class", "point")
+            .style("display", "none");
 
         // text box holding information about data point
         point.append("rect")
             .attr("width", 145)
             .attr("height", 50)
             .attr("transform", "translate(-70, -60)");
-
+        
         point.append("text")
             .attr("id", "time")
             .attr("x", -60)
@@ -185,7 +202,7 @@
                 .attr("x2", x(d_time));
         }
         
-        // TODO: clicking highlights a point for the profit calculation
+        // clicking highlights a point for the profit calculation
         function calcProfit() {
             var x0 = x.invert(d3.mouse(this)[0]),
                 i = bisect(daData, x0, 1),
@@ -194,10 +211,12 @@
                 d = x0 - d0.time > d1.time - x0 ? d1 : d0;
             
             // check if the user already clicked another point
-            if (!profitPoints["first"]) {
-                svg.selectAll(".profitPoint").remove();
-                profitPoints["first"] = d;
-                document.getElementById("first").innerHTML = "If you bought for "+formatCurrency(d.price)+" on "+formatDate(d.time);
+            if (!profitPoints["date1"]) {
+                clearProfits();
+                profitPoints["date1"] = d;
+                console.log(d);
+                document.getElementById("date1").innerHTML = formatDate(d.time);
+                document.getElementById("price1").innerHTML = formatCurrency(d.price);
                 
             // append circle to clicked point
             svg.append("circle")
@@ -207,14 +226,16 @@
                 .attr("class","profitPoint");
             }
             // check if second point is before the first one chronologically
-            else if (profitPoints["first"].time >= d.time) {
+            else if (profitPoints["date1"].time >= d.time) {
                 var nodes = document.getElementById("profits").childNodes;
                 for (var i=0; i<nodes.length; i++) {
                     nodes[i].innerHTML = "";
                 }
                 profitPoints = {};
-                svg.selectAll(".profitPoint").remove();
-                document.getElementById("first").innerHTML = "Please pick a valid date range.";
+
+                clearProfits();
+                document.getElementById("error").innerHTML = "Please pick a valid date range.";
+
             }
             // calculate profit
             else {
@@ -225,8 +246,10 @@
                     .attr("r", 7)
                     .attr("class","profitPoint");
 
-                var result = formatCurrency(d.price - profitPoints["first"].price);
-                document.getElementById("result").innerHTML = " and sold on "+formatDate(d.time)+" for "+formatCurrency(d.price)+" you would have made "+result;
+                var result = formatCurrency(d.price - profitPoints["date1"].price);
+                document.getElementById("date2").innerHTML = formatDate(d.time);
+                document.getElementById("price2").innerHTML = formatCurrency(d.price);
+                document.getElementById("result").innerHTML = result;
                 profitPoints = {};
             }
         }
@@ -280,19 +303,18 @@
             .ticks(9);
         }
 
-        //===================Make zoom function=======================
+//        //===================Make zoom function=======================
+        //zoom example from: http://bl.ocks.org/mhsmith/5732011
         zoom = d3.behavior.zoom()
             .x(x)
             .y(y)
+            .scaleExtent([1, 6])
             .on("zoom", zoomed);
 
         // Xiao's zooming function
         function zoomed() {
-            console.log(d3.event.translate);
-            console.log(d3.event.scale);
             
-            // clear profits points
-            svg.selectAll(".profitPoint").remove();
+            clearProfits()
 
             svg.select(".x.axis").call(xAxis);
             svg.select(".y.axis").call(yAxis);
@@ -365,8 +387,8 @@
     */
 
     function updateGraph(csvfile) {
-        // clear profits points
-        svg.selectAll(".profitPoint").remove();
+        
+        clearProfits();
         
     	// pull the data for the bitcoins and create the graph
 	    d3.csv(csvfile, function(error, rows) {
@@ -376,11 +398,9 @@
 	    	});
 
 	        daData = rows;
-	        //console.log(x.domain());
 	        //return min and max dates for x-axis and prices for y-axis
         	x.domain(d3.extent(rows, function(d) { return d.date; })).range([0, width]);
         	y.domain(d3.extent(rows, function(d) { return d.price; })).range([height, 0]);
-        	//console.log(x.domain());
 	        //section we wish to apply changes/transitions
 	        var svg = d3.select("#graph").transition();
 

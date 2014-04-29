@@ -4,14 +4,64 @@ body {
     background-color: #292929;
 }
 
-#logo {
+
+#logo{
     height: 50px;
-    width: 275px
+    width: 275px;
+    float: right;
+}
+
+#inputs{
+    float: right;
+    clear: both;
+    font-size: 20px;
+    margin-top: 10px;
+    color: #FF9900;
+}
+
+#zoomtext{
+    float: right;
+    clear: both;
+    font-size: 15px;
+    font-style: italic;
+
+}
+
+#calculator{
+    float: right;
+    clear: both;
+    width: 300px;
+    margin-top: 40px;
+}
+
+#sell, #buy, #total {
+    color: #FF9900;
+}
+
+#clearprofits {
+    background-color: #fff;
+    
+}
+
+#profits{
+    margin-top: -20px;   
+}
+
+#profittext{
+    font-size: small;   
+}
+
+#error{
+    color: red;   
+}
+
+.profitdata{
+    color: #fff;   
 }
 
 .profitPoint {
     fill: none;
-    stroke: red;
+    stroke: #fff;
     stroke-width: 2;
 }
             
@@ -30,9 +80,8 @@ svg {
 }
 
 #graph {
- 
     float: left;
-    clear: both;
+    margin-top: -150px;
 }
 
 #minigraph {
@@ -89,5 +138,4 @@ svg {
 #time, #price {
     font-size: small;
     fill: #fff;
-    
 }
