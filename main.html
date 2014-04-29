@@ -16,17 +16,10 @@
         <input type="radio" name="timeframe" value="daily" onclick="updateGraph('bitcoins-daily.csv')">Daily
         <input type="radio" name="timeframe" value="weekly" onclick="updateGraph('bitcoins-weekly.csv')">Weekly
     </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-    
-    <p>Click two different points to see their profits!</p>
-=======
-=======
->>>>>>> FETCH_HEAD
 
     <!-- Profits interface -->
-    <p>Click two different points to see their profit!</p>
->>>>>>> FETCH_HEAD
+    <p>Click two different points to see their profits!</p>
+
     <div id='profits'>
         <span id='first'></span>
         <span id='second'></span>
@@ -230,16 +223,10 @@
                     nodes[i].innerHTML = "";
                 }
                 profitPoints = {};
-<<<<<<< HEAD
-<<<<<<< HEAD
-                svg.selectAll(".profitPoint").remove();
-                document.getElementById("first").innerHTML = "<span id='error'>Please pick a valid date range.</span>";
-=======
-=======
->>>>>>> FETCH_HEAD
+
                 clearProfits();
-                document.getElementById("first").innerHTML = "Please pick a valid date range.";
->>>>>>> FETCH_HEAD
+                document.getElementById("first").innerHTML = "<span id='error'>Please pick a valid date range.</span>";
+
             }
             // calculate profit
             else {
